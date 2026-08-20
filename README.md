@@ -27,7 +27,7 @@ Twórz interfejsy w mgnieniu oka, korzystając z intuicyjnego płótna projektow
 <div align="center">
   <img src="image/3.png" alt="Widok projektowania wizualnego" width="700"/>
   <br>
-  <em>W Burstzyn OS przykładowana aplikacja stworzona w konstruktorze</em>
+  <em>Przykładowa aplikacja stworzona w konstruktorze dla Bursztyna</em>
 </div>
 <div align="center">
   <img src="image/1.png" alt="Podgląd wygenerowanego kodu C++" width="700"/>
