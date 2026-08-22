@@ -7,12 +7,66 @@ let deletedElements = [];   // stos usunietych (Ctrl+Z / przywroc)
 let elementIdCounter = 1;
 let selectedId = null;
 
+/* Zakladki formularzy: okno glowne + kazde okno podrzedne ma wlasna karte. */
+let activeFormId = null;
+
+const FORM_TYPES = ['window', 'TChildWindow'];
+
+function formsList() {
+    return elements.filter(e => FORM_TYPES.includes(e.type));
+}
+
+function ensureActiveForm() {
+    const cur = elements.find(e => e.id === activeFormId && FORM_TYPES.includes(e.type));
+    if (!cur) {
+        const win = elements.find(e => e.type === 'window') || formsList()[0];
+        activeFormId = win ? win.id : null;
+    }
+}
+
+/* Przypisuje element do najmniejszego formularza (okno glowne lub dziecko),
+ * ktorego prostokat zawiera srodek elementu. */
+function assignForm(el) {
+    let best = null;
+    for (const f of formsList()) {
+        if (f.id === el.id) continue;
+        const cx = el.x + el.w / 2, cy = el.y + el.h / 2;
+        if (cx >= f.x && cx < f.x + f.w && cy >= f.y && cy < f.y + f.h) {
+            if (!best || (f.w * f.h) < (best.w * best.h)) best = f;
+        }
+    }
+    el.formId = best ? best.id : (elements.find(e => e.type === 'window')?.id ?? el.id);
+}
+
+/* Formularz-gospodarz dla okna dodatkowego (na czyjej karcie lezy ramka). */
+function hostFormOf(formEl) {
+    let best = null;
+    for (const f of formsList()) {
+        if (f.id === formEl.id) continue;
+        const cx = formEl.x + formEl.w / 2, cy = formEl.y + formEl.h / 2;
+        if (cx >= f.x && cx < f.x + f.w && cy >= f.y && cy < f.y + f.h) {
+            if (!best || (f.w * f.h) < (best.w * best.h)) best = f;
+        }
+    }
+    return best ? best.id : null;
+}
+
+window.setActiveForm = function (id) {
+    activeFormId = id;
+    selectedId = null;
+    ensureActiveForm();
+    updateUI();
+};
+
+window.selectFormTab = window.setActiveForm;
+
 function addElement(type, x = 100, y = 100, w = 120, h = 30, text = "") {
     const id = elementIdCounter++;
     let zIndex = elements.length;
     let el = { id, type, x, y, w, h, z: zIndex, name: `${type}_${id}`, onClick: '', visualEvents: [], eventMode: 'visual' };
 
-    if (type === 'window') { el.text = text || "Aplikacja Bursztyn"; el.bg = OS_COLORS.CarbonBg; }
+    if (type === 'window') { el.text = text || "Aplikacja Bursztyn"; el.bg = OS_COLORS.CarbonBg; el.minBtn = true; el.maxBtn = true; }
+    else if (type === 'TChildWindow' || type === 'TModalWindow' || type === 'TPopupWindow') { el.text = text || el.name; el.bg = OS_COLORS.CarbonPanel; }
     else if (type === 'TPanel' || type.includes('Grid') || type === 'TGroupBox' || type === 'TRadioGroup') { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.CarbonBorder; el.text = text; }
     else if (type === 'TButton' || type === 'TBitBtn') { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.White; el.text = text; }
     else if (type === 'TLabel' || type === 'TCheckBox' || type === 'TRadioButton') { el.bg = OS_COLORS.Transparent; el.color = OS_COLORS.White; el.scale = 1; el.text = text; }
@@ -23,6 +77,12 @@ function addElement(type, x = 100, y = 100, w = 120, h = 30, text = "") {
     else { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.White; el.text = text; }
 
     elements.push(el);
+    if (FORM_TYPES.includes(type)) {
+        el.formId = id;
+        el.hostFormId = hostFormOf(el);
+        if (!activeFormId && type === 'window') activeFormId = id;
+    }
+    else assignForm(el);
     selectElement(id);
     updateUI();
     return id;
@@ -39,6 +99,7 @@ function duplicateSelected() {
     copy.name = `${src.type}_${id}`;
     copy.x += 20; copy.y += 20;
     copy.z = elements.length;
+    if (FORM_TYPES.includes(copy.type)) { copy.formId = id; copy.hostFormId = hostFormOf(copy); }
     elements.push(copy);
     selectElement(id);
     updateUI();
@@ -49,6 +110,8 @@ function restoreDeleted() {
     if (!deletedElements.length) return;
     const el = deletedElements.pop();
     if (el.id >= elementIdCounter) elementIdCounter = el.id + 1;
+    if (FORM_TYPES.includes(el.type)) { el.formId = el.id; el.hostFormId = hostFormOf(el); }
+    else assignForm(el);
     elements.push(el);
     selectElement(el.id);
     updateUI();
@@ -106,12 +169,23 @@ function loadJSON(e) {
                 elements.forEach(el => {
                     if (el.id > maxId) maxId = el.id;
                     if (!el.visualEvents) el.visualEvents = [];
+                    el.visualEvents.forEach(ev => { if (!ev.uid) ev.uid = Math.random().toString(36).slice(2, 8); });
                     if (!el.eventMode) el.eventMode = 'visual';
                     if (el.onClick === undefined) el.onClick = '';
+                    if (el.type === 'window') {
+                        if (el.minBtn === undefined) el.minBtn = true;
+                        if (el.maxBtn === undefined) el.maxBtn = true;
+                    }
                 });
+                // Dwa przebiegi: najpierw formularze, potem przypisanie reszty.
+                elements.forEach(el => {
+                    if (FORM_TYPES.includes(el.type)) { el.formId = el.id; el.hostFormId = hostFormOf(el); }
+                });
+                elements.forEach(el => { if (!FORM_TYPES.includes(el.type)) assignForm(el); });
                 elementIdCounter = maxId + 1;
                 deletedElements = [];
                 selectedId = null;
+                ensureActiveForm();
                 updateUI();
             }
         } catch (err) { alert("Błąd wczytywania pliku JSON! Upewnij się, że to poprawny plik projektu Bursztyn."); }
@@ -121,5 +195,6 @@ function loadJSON(e) {
 
 Object.assign(window, {
     addElement, deleteSelected, duplicateSelected, restoreDeleted,
-    clearCanvas, selectElement, saveJSON, loadJSON
+    clearCanvas, selectElement, saveJSON, loadJSON,
+    formsList, ensureActiveForm, assignForm, hostFormOf
 });

@@ -15,8 +15,59 @@ let startX, startY, initialX, initialY, initialW, initialH;
 
 function toggleAccordion(id) { document.getElementById(id).classList.toggle('open'); }
 
+let paletteFilter = '';
+
+window.setPaletteFilter = function (v) {
+    paletteFilter = String(v || '').trim();
+    buildPalette();
+};
+
+/* Wspolny kafelek komponentu z tooltipem pokazujacym uzywane API BWS. */
+function paletteButtonHtml(comp) {
+    let textArg = comp.name;
+    if (['TComboBox', 'TListBox', 'TCheckListBox', 'TMainMenu', 'TPopupMenu'].includes(comp.type)) textArg = "Plik\\nEdycja\\nWidok";
+    else if (comp.type === 'TRadioGroup') textArg = "Opcje\\nOpcja 1\\nOpcja 2";
+
+    let onClickStr = `addElement('${comp.type}', 100, 100, ${comp.w}, ${comp.h}, '${textArg}')`;
+    const apiTip = bwsApiForType(comp.type).replace(/"/g, '&quot;');
+    return `
+                <button onclick="${onClickStr}" title="${apiTip}" class="flex flex-col items-center justify-center p-2 bg-carbon-950 hover:bg-carbon-800 rounded border border-carbon-800 hover:border-bursztyn-500 transition-all group">
+                    <span class="text-base group-hover:scale-110 transition-transform">${comp.icon}</span>
+                    <span class="text-[9px] text-gray-400 mt-1 text-center leading-tight overflow-hidden text-ellipsis w-full whitespace-nowrap">${comp.name}</span>
+                </button>
+            `;
+}
+
+/* Wyniki wyszukiwania: filtrowanie po nazwie/typie/kategorii + automatyczne
+ * sortowanie (trafienia "zaczyna sie od..." najpierw, potem alfabetycznie). */
+function renderFilteredPalette(container) {
+    const q = foldPl(paletteFilter);
+    let matches = [];
+    for (const [catName, components] of Object.entries(COMPONENT_DB)) {
+        components.forEach(comp => {
+            const hay = foldPl(comp.name + ' ' + comp.type + ' ' + catName);
+            if (hay.includes(q)) matches.push(Object.assign({}, comp, { catName }));
+        });
+    }
+    matches.sort((a, b) => {
+        const pa = (foldPl(a.name).startsWith(q) || foldPl(a.type).startsWith(q)) ? 0 : 1;
+        const pb = (foldPl(b.name).startsWith(q) || foldPl(b.type).startsWith(q)) ? 0 : 1;
+        if (pa !== pb) return pa - pb;
+        return a.name.localeCompare(b.name, 'pl');
+    });
+
+    let html = `<div class="text-[9px] text-gray-500 px-1 pb-1">${matches.length} wynik(ów) — posortowane</div>`;
+    html += `<div class="grid grid-cols-2 gap-1">`;
+    matches.forEach(comp => { html += paletteButtonHtml(comp); });
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
 function buildPalette() {
     const container = document.getElementById('palette-container');
+
+    if (paletteFilter !== '') { renderFilteredPalette(container); return; }
+
     let html = '';
     for (const [catName, components] of Object.entries(COMPONENT_DB)) {
         let catId = 'cat-' + catName.replace(/[^a-zA-Z]/g, '');
@@ -27,59 +78,180 @@ function buildPalette() {
                 </button>
                 <div id="${catId}" class="accordion-content ${catName.includes('Podstawowe') ? 'open' : ''} grid-cols-2 gap-1 p-1 bg-carbon-900">
         `;
-        components.forEach(comp => {
-            let textArg = comp.name;
-            if (['TComboBox', 'TListBox', 'TCheckListBox', 'TMainMenu', 'TPopupMenu'].includes(comp.type)) textArg = "Plik\\nEdycja\\nWidok";
-            else if (comp.type === 'TRadioGroup') textArg = "Opcje\\nOpcja 1\\nOpcja 2";
-
-            let onClickStr = `addElement('${comp.type}', 100, 100, ${comp.w}, ${comp.h}, '${textArg}')`;
-            html += `
-                <button onclick="${onClickStr}" class="flex flex-col items-center justify-center p-2 bg-carbon-950 hover:bg-carbon-800 rounded border border-carbon-800 hover:border-bursztyn-500 transition-all group">
-                    <span class="text-base group-hover:scale-110 transition-transform">${comp.icon}</span>
-                    <span class="text-[9px] text-gray-400 mt-1 text-center leading-tight overflow-hidden text-ellipsis w-full whitespace-nowrap">${comp.name}</span>
-                </button>
-            `;
-        });
+        components.forEach(comp => { html += paletteButtonHtml(comp); });
         html += `</div></div>`;
     }
     container.innerHTML = html;
     buildBlocksPalette();
 }
 
-/* Paleta akcji API w Edytorze Wizualnym - pogrupowana wg obszarow BWS. */
-function buildBlocksPalette() {
-    const groups = {};
-    for (const key in ACTION_TYPES) {
-        const act = ACTION_TYPES[key];
-        const g = act.grupa || 'Inne';
-        if (!groups[g]) groups[g] = [];
-        groups[g].push({ key, ...act });
-    }
-    let html = '';
-    for (const g in groups) {
-        html += `<div class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-3 mb-1 border-t border-carbon-800 pt-2 first:border-t-0 first:mt-0">${g}</div>`;
-        groups[g].forEach(act => {
-            html += `<button onclick="addVisualEventModal('${act.key}')" title="${act.name}" class="flex items-center gap-2 p-2 bg-carbon-800 hover:bg-carbon-700 border border-carbon-700 rounded text-left transition-colors"><span class="text-lg shrink-0">${act.icon}</span><div class="text-[10px] font-bold text-gray-200 leading-tight">${act.name}</div></button>`;
-        });
-    }
-    document.getElementById('blocks-palette').innerHTML = html;
+/* Paleta bloków Edytora Wizualnego - kategorie kolorami jak w Scratch,
+ * z polem wyszukiwania (automatyczne sortowanie wyników) i przeciaganiem
+ * klockow do obszaru roboczego. */
+let blockFilter = '';
+
+window.setBlockFilter = function (v) {
+    blockFilter = String(v || '').trim();
+    buildBlocksPalette();
+};
+
+function catMeta(kat) {
+    return BLOCK_CATS.find(c => c.id === kat) || { id: 'api', name: 'API BWS', color: '#E58A00' };
 }
 
-/* --------------------------- Drzewo obiektow -------------------------- */
+function hexAlpha(hexColor, a) {
+    const h = String(hexColor || '#888888').replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16) || 0;
+    const g = parseInt(h.substring(2, 4), 16) || 0;
+    const b = parseInt(h.substring(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+function blockChipHtml(key, def) {
+    const meta = catMeta(def.kat);
+    const wrapBadge = def.hat ? '▶ blok startowy'
+        : (def.wrap === 'open' ? '▼ otwiera zakres'
+            : (def.wrap === 'close' ? '▲ zamyka zakres'
+                : (def.wrap === 'else' ? '◆ przeciwna gałąź' : '')));
+    // Klik = dopisz blok na koniec skryptu; przeciaganie = wstaw w wybranym miejscu.
+    return `<button draggable="true" data-block="${key}" onclick="addVisualEventModal('${key}')" title="${meta.name} — ${def.name}" class="block-chip ${def.hat ? 'hat-block' : ''}" style="border-left-color:${meta.color};background:linear-gradient(90deg, ${hexAlpha(meta.color, 0.22)}, rgba(24,24,24,0.92));">
+        <span class="text-base shrink-0">${def.icon}</span>
+        <span class="flex-1 min-w-0 text-left leading-tight">
+            <span class="font-bold text-[10px] block truncate">${def.name}</span>
+            ${wrapBadge ? `<span class="text-[8px] opacity-70">${wrapBadge}</span>` : ''}
+        </span>
+    </button>`;
+}
+
+/* Wyszukiwanie akcji: filtrowanie po nazwie/kodzie/kategorii + sortowanie
+ * automatyczne (trafienia "zaczyna się od..." najpierw, potem alfabetycznie). */
+function renderFilteredBlocks(container) {
+    const q = foldPl(blockFilter);
+    let matches = [];
+    for (const key in ACTION_TYPES) {
+        const def = ACTION_TYPES[key];
+        const hay = foldPl(def.name + ' ' + key + ' ' + catMeta(def.kat).name);
+        if (hay.includes(q)) matches.push({ key, def });
+    }
+    matches.sort((a, b) => {
+        const pa = foldPl(a.def.name).startsWith(q) ? 0 : 1;
+        const pb = foldPl(b.def.name).startsWith(q) ? 0 : 1;
+        if (pa !== pb) return pa - pb;
+        return a.def.name.localeCompare(b.def.name, 'pl');
+    });
+    container.innerHTML =
+        `<div class="text-[9px] text-gray-500 px-1 pb-1">${matches.length} wynik(ów) — posortowane</div>
+         <div class="grid grid-cols-1 gap-1">${matches.map(m => blockChipHtml(m.key, m.def)).join('')}</div>`;
+}
+
+function buildBlocksPalette() {
+    const container = document.getElementById('blocks-palette');
+    if (!container) return;
+
+    if (blockFilter !== '') {
+        renderFilteredBlocks(container);
+        bindBlockDrag(container);
+        return;
+    }
+
+    let html = '';
+    BLOCK_CATS.forEach(cat => {
+        const keys = Object.keys(ACTION_TYPES).filter(k => ACTION_TYPES[k].kat === cat.id);
+        if (!keys.length) return;
+        html += `<div class="mt-3 first:mt-0">
+            <div class="text-[9px] font-bold uppercase tracking-widest mb-1 px-1.5 py-0.5 rounded" style="color:${cat.color};background:${hexAlpha(cat.color, 0.15)}">${cat.name}</div>
+            <div class="flex flex-col gap-1">`;
+        keys.forEach(k => { html += blockChipHtml(k, ACTION_TYPES[k]); });
+        html += `</div></div>`;
+    });
+    container.innerHTML = html;
+    bindBlockDrag(container);
+}
+
+/* Umozliwia przeciaganie klocka z palety do obszaru roboczego (Scratch). */
+function bindBlockDrag(container) {
+    container.querySelectorAll('[data-block]').forEach(chip => {
+        chip.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('application/x-bws-block', chip.dataset.block);
+            e.dataTransfer.effectAllowed = 'copy';
+        });
+    });
+}
+
+/* --------------------------- Zakladki formularzy ----------------------- */
+
+function renderTabs() {
+    const bar = document.getElementById('form-tabs');
+    if (!bar) return;
+    ensureActiveForm();
+    let html = '';
+    formsList().forEach(f => {
+        const icon = f.type === 'window' ? '🏠' : '🪟';
+        const active = f.id === activeFormId;
+        html += `<button onclick="selectFormTab(${f.id})" class="form-tab ${active ? 'active' : ''}" title="${f.type === 'window' ? 'Okno główne' : 'Okno podrzędne — własna zakładka'}">${icon} ${f.name}</button>`;
+    });
+    bar.innerHTML = html;
+}
+
+/* ------------------------------ Drzewo --------------------------------- */
+
+let dragTreeId = null;
+
+function treeDropReorder(srcId, targetId) {
+    if (!srcId || !targetId || srcId === targetId) return;
+    // Kolejnosc wyswietlania = z malejaco (najwyzszy u gory).
+    const list = [...elements].sort((a, b) => b.z - a.z);
+    const si = list.findIndex(x => x.id === srcId);
+    if (si < 0) return;
+    const [item] = list.splice(si, 1);
+    const ti = list.findIndex(x => x.id === targetId);
+    if (ti < 0) list.push(item); else list.splice(ti, 0, item);
+    // Natychmiastowa aktualizacja parametru z-order.
+    list.forEach((el, i) => { el.z = list.length - 1 - i; });
+    updateUI();
+}
+
+/* Elementy widoczne na aktywnej karcie formularza. */
+function visibleElements() {
+    return elements.filter(el => {
+        if (FORM_TYPES.includes(el.type)) {
+            if (el.type === 'window') return el.formId === activeFormId;
+            return el.hostFormId === activeFormId; // podokno na karcie rodzica
+        }
+        return el.formId === activeFormId;
+    });
+}
 
 function renderTree() {
     treePanel.innerHTML = '';
-    const sortedElements = [...elements].sort((a, b) => b.z - a.z);
+    const sortedElements = [...visibleElements()].sort((a, b) => b.z - a.z);
+    if (!sortedElements.length) {
+        treePanel.innerHTML = '<div class="text-[10px] text-gray-600 italic px-1">Pusto — dodaj komponent lub przełącz zakładkę.</div>';
+        return;
+    }
     sortedElements.forEach(el => {
         const btn = document.createElement('div');
         btn.className = `tree-item px-2 py-1.5 rounded transition-colors flex items-center gap-2 ${selectedId === el.id ? 'bg-bursztyn-600 text-white font-bold' : 'text-gray-400 hover:bg-carbon-800 hover:text-gray-200'}`;
-        btn.innerHTML = `<span>${getIconFor(el.type)}</span> <span class="truncate">${el.name}</span>`;
+        btn.draggable = true;
+        btn.innerHTML = `<span>${getIconFor(el.type)}</span> <span class="truncate flex-1">${el.name}</span><span class="text-[9px] opacity-60">z:${el.z}</span>`;
+        btn.title = 'Przeciągnij, aby zmienić kolejność (z-order)';
         btn.onclick = () => selectElement(el.id);
+        btn.ondragstart = (e) => { dragTreeId = el.id; e.dataTransfer.setData('text/plain', String(el.id)); e.dataTransfer.effectAllowed = 'move'; };
+        btn.ondragend = () => { dragTreeId = null; };
+        btn.ondragover = (e) => { if (dragTreeId !== null && dragTreeId !== el.id) { e.preventDefault(); btn.classList.add('tree-over'); } };
+        btn.ondragleave = () => btn.classList.remove('tree-over');
+        btn.ondrop = (e) => {
+            e.preventDefault();
+            btn.classList.remove('tree-over');
+            const srcId = parseInt(e.dataTransfer.getData('text/plain'), 10) || dragTreeId;
+            treeDropReorder(srcId, el.id);
+            dragTreeId = null;
+        };
         treePanel.appendChild(btn);
     });
 }
 
-function updateUI() { renderCanvas(); renderProperties(); renderTree(); }
+function updateUI() { renderTabs(); renderCanvas(); renderProperties(); renderTree(); }
 
 /* ------------------------------- Plotno -------------------------------- */
 
@@ -88,20 +260,23 @@ function getIconFor(type) { for (let cat in COMPONENT_DB) { let found = COMPONEN
 
 function renderCanvas() {
     canvas.innerHTML = '';
-    const sortedElements = [...elements].sort((a, b) => {
-        if (a.type === 'window' && b.type !== 'window') return -1;
-        if (b.type === 'window' && a.type !== 'window') return 1;
+    const SPEC_WIN = ['TChildWindow', 'TModalWindow', 'TPopupWindow'];
+    const winKind = t => t === 'window' ? 0 : (SPEC_WIN.includes(t) ? 1 : 2);
+    const sortedElements = [...visibleElements()].sort((a, b) => {
+        const ra = winKind(a.type), rb = winKind(b.type);
+        if (ra !== rb) return ra - rb;
         return a.z - b.z;
     });
 
     sortedElements.forEach(el => {
         const node = document.createElement('div');
         let isWindow = (el.type === 'window');
+        let isSpecWin = SPEC_WIN.includes(el.type);
 
-        node.className = `element-node ${selectedId === el.id ? 'selected' : ''} ${isWindow ? 'window-node' : ''}`;
+        node.className = `element-node ${selectedId === el.id ? 'selected' : ''} ${(isWindow || isSpecWin) ? 'window-node' : ''}`;
         node.style.left = `${el.x}px`; node.style.top = `${el.y}px`;
         node.style.width = `${el.w}px`; node.style.height = `${el.h}px`;
-        node.style.zIndex = isWindow ? 0 : (el.z + 10);
+        node.style.zIndex = isWindow ? 0 : (isSpecWin ? 5 : (el.z + 10));
 
         let isNV = isNonVisual(el.type);
 
@@ -111,7 +286,20 @@ function renderCanvas() {
         }
         else if (isWindow) {
             node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.border = `2px solid ${bursztynToRGBA(OS_COLORS.AmberMid)}`;
-            node.innerHTML = `<div style="background-color: ${bursztynToRGBA(OS_COLORS.AmberMid)}; height: 24px; color: #FFF; font-size: 11px; font-weight: bold; padding: 0 8px; display:flex; align-items:center; justify-content:space-between;"><span>${el.text}</span><div style="display:flex; gap: 4px;"><div style="width:14px;height:14px;background:#E58A00;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#000;font-size:10px">-</div><div style="width:14px;height:14px;background:#AA0000;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:10px">x</div></div></div>`;
+            // Przyciski paska tytulu zalezne od ustawien (minBtn/maxBtn)
+            let btns = '';
+            if (el.maxBtn !== false) btns += `<div style="width:14px;height:14px;background:#E58A00;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#000;font-size:9px">□</div>`;
+            if (el.minBtn !== false) btns += `<div style="width:14px;height:14px;background:#E58A00;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#000;font-size:10px">−</div>`;
+            btns += `<div style="width:14px;height:14px;background:#AA0000;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:10px">x</div>`;
+            node.innerHTML = `<div style="background-color: ${bursztynToRGBA(OS_COLORS.AmberMid)}; height: 24px; color: #FFF; font-size: 11px; font-weight: bold; padding: 0 8px; display:flex; align-items:center; justify-content:space-between;"><span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${el.text}</span><div style="display:flex; gap: 4px;">${btns}</div></div>`;
+        }
+        else if (isSpecWin) {
+            node.style.backgroundColor = bursztynToRGBA(el.bg);
+            if (el.type === 'TChildWindow') node.style.border = `1px dashed ${bursztynToRGBA(OS_COLORS.AmberLight)}`;
+            else if (el.type === 'TModalWindow') { node.style.border = `3px double #FFBF00`; node.style.boxShadow = '0 0 18px rgba(0,0,0,0.6)'; }
+            else { node.style.border = `2px solid ${bursztynToRGBA(OS_COLORS.AmberLight)}`; node.style.borderRadius = '6px'; }
+            const barH = el.type === 'TPopupWindow' ? 18 : 20;
+            node.innerHTML = `<div style="background:${bursztynToRGBA(OS_COLORS.AmberMid)};height:${barH}px;color:#FFF;font-size:10px;font-weight:bold;padding:0 6px;display:flex;align-items:center;justify-content:space-between;"><span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${el.text}</span><div style="width:12px;height:12px;background:#AA0000;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:9px;">x</div></div>${el.type === 'TModalWindow' ? `<div style="position:absolute;left:0;right:0;top:${barH}px;bottom:0;background:repeating-linear-gradient(45deg, rgba(255,191,0,0.07) 0 6px, transparent 6px 12px);pointer-events:none;"></div>` : ''}`;
         }
         else if (el.type === 'TPanel' || el.type.includes('Grid')) {
             node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.border = `1px solid ${bursztynToRGBA(el.color)}`;
@@ -204,6 +392,8 @@ function startDrag(e, id) {
     e.preventDefault(); e.stopPropagation(); selectElement(id);
     isDragging = true; dragTarget = elements.find(el => el.id === id);
     startX = e.clientX; startY = e.clientY;
+    // Migawka pozycji wszystkich elementow - potrzebna do wspolnego przesuwania
+    // dzieci lezacych srodkiem w przeciaganym kontenerze (panel/okno/grupa).
     elements.forEach(el => { el.initialStartX = el.x; el.initialStartY = el.y; });
 }
 function startResize(e, dir, id) {
@@ -218,8 +408,28 @@ function onGlobalMove(e) {
         let dx = Math.round((e.clientX - startX) / 10) * 10;
         let dy = Math.round((e.clientY - startY) / 10) * 10;
         dragTarget.x = dragTarget.initialStartX + dx; dragTarget.y = dragTarget.initialStartY + dy;
+        const isContainer = CONTAINER_TYPES.includes(dragTarget.type);
         if (dragTarget.type === 'window') {
-            elements.forEach(el => { if (el.id !== dragTarget.id) { el.x = el.initialStartX + dx; el.y = el.initialStartY + dy; } });
+            // Okno glowne pociaga za soba cala zawartosc swojej karty.
+            elements.forEach(el => {
+                if (el.id === dragTarget.id || FORM_TYPES.includes(el.type)) return;
+                el.x = el.initialStartX + dx; el.y = el.initialStartY + dy;
+            });
+        } else if (isContainer) {
+            // Panel/grupa: przesuwa WYLACZNIE zwykle kontrolki lezace srodkiem
+            // w jego prostokacie. Nigdy nie rusza zadnych okien (glownego,
+            // podrzednych, modalnych, pop-up).
+            const r = { x: dragTarget.initialStartX, y: dragTarget.initialStartY, w: dragTarget.w, h: dragTarget.h };
+            elements.forEach(el => {
+                if (el.id === dragTarget.id || FORM_TYPES.includes(el.type)) return;
+                if (el.formId !== activeFormId) return; // tylko zawartosc tej karty
+                const cx = el.initialStartX + el.w / 2;
+                const cy = el.initialStartY + el.h / 2;
+                if (cx >= r.x && cx < r.x + r.w && cy >= r.y && cy < r.y + r.h) {
+                    el.x = el.initialStartX + dx;
+                    el.y = el.initialStartY + dy;
+                }
+            });
         }
         renderCanvas(); renderProperties();
     }
@@ -253,7 +463,7 @@ function showContextMenu(e, id) {
 
 Object.assign(window, {
     toggleAccordion, buildPalette, buildBlocksPalette,
-    renderTree, updateUI, renderCanvas,
-    isNonVisual, getIconFor,
+    renderTree, updateUI, renderCanvas, renderTabs, treeDropReorder, visibleElements,
+    isNonVisual, getIconFor, hexAlpha,
     startDrag, startResize, onGlobalMove, onGlobalUp, showContextMenu
 });

@@ -60,11 +60,59 @@ function intParam(v, fallback) {
     return Number.isFinite(n) ? n : (fallback || 0);
 }
 
+/* =========================================================================
+ * Konwersje kolorow dla plynnego probnika (SV + hue)
+ * ========================================================================= */
+
+function hexToHsv(hex) {
+    let h = String(hex || '#FFBF00').replace('#', '');
+    if (h.length < 6) h = ('000000' + h).slice(-6);
+    const r = parseInt(h.substring(0, 2), 16) / 255;
+    const g = parseInt(h.substring(2, 4), 16) / 255;
+    const b = parseInt(h.substring(4, 6), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const d = max - min;
+    let hh = 0;
+    if (d > 0) {
+        if (max === r) hh = ((g - b) / d) % 6;
+        else if (max === g) hh = (b - r) / d + 2;
+        else hh = (r - g) / d + 4;
+        hh *= 60;
+        if (hh < 0) hh += 360;
+    }
+    return { h: hh, s: max === 0 ? 0 : d / max, v: max };
+}
+
+function hsvToHex(hh, s, v) {
+    const c = v * s;
+    const hp = (((hh % 360) + 360) % 360) / 60;
+    const x = c * (1 - Math.abs((hp % 2) - 1));
+    let r = 0, g = 0, b = 0;
+    if (hp < 1) { r = c; g = x; }
+    else if (hp < 2) { r = x; g = c; }
+    else if (hp < 3) { g = c; b = x; }
+    else if (hp < 4) { g = x; b = c; }
+    else if (hp < 5) { r = x; b = c; }
+    else { r = c; b = x; }
+    const m = v - c;
+    const t = val => Math.round(Math.max(0, Math.min(1, val + m)) * 255).toString(16).padStart(2, '0').toUpperCase();
+    return '#' + t(r) + t(g) + t(b);
+}
+
+/* Sklada tekst do porownan wyszukiwania bez polskich znakow diakrytycznych. */
+const PL_FOLD_MAP = { 'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n', 'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z' };
+function foldPl(s) {
+    return String(s || '').toLowerCase().replace(/[ąćęłńóśźż]/g, ch => PL_FOLD_MAP[ch] || ch);
+}
+
 Object.assign(window, {
     parseBursztynColor,
     buildBursztynColor,
     bursztynToRGBA,
     escapeCppString,
     cIdent,
-    intParam
+    intParam,
+    hexToHsv,
+    hsvToHex,
+    foldPl
 });

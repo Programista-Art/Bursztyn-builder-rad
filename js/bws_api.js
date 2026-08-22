@@ -544,4 +544,90 @@ const BWS_SYSCALLS = [
 /* Sortuje wpisy po numerze - wygodne dla przegladarki API. */
 BWS_SYSCALLS.sort((a, b) => a.nr - b.nr);
 
-Object.assign(window, { BWS_ZDARZENIA, BWS_STRUKTURY, BWS_SYSCALLS });
+/* =========================================================================
+ * MAPA KOMPONENT -> WYWOLANIA BWS
+ * Kazdy komponent z palety jest implementowany w generowanym C++ wylacznie
+ * przez API BWS (bursztyn_gui.h / syscalls.cpp). Pole api opisuje, ktore
+ * numery BWS i wrappery sa uzywane - widoczne w palecie i inspektorze.
+ * ========================================================================= */
+const TYPE_BWS_MAP = {
+    'window':               'BWS 14 rysuj_okno · 19 odswiez_pulpit · 33 utworz_warstwe · 34 przesun · 17 odswiez · 37/38 zdarzenia',
+    'TChildWindow':         'BWS 21 prostokat · 20 tekst · 2/3 MYSZ_DOWN/UP · przeciąganie wewnątrz rodzica',
+    'TModalWindow':         'BWS 21 prostokat · 20 tekst · blokada zdarzeń pod spodem (MYSZ_DOWN)',
+    'TPopupWindow':         'BWS 56 popup_aplikacji · MYSZ_PRAWY_DOWN (20) pokazuje/ukrywa · 21+20 rysowanie',
+    'TMainMenu':            'BWS 21 prostokat · 20 tekst pozycji menu',
+    'TPopupMenu':           'BWS 56 gui_ustaw_popup_aplikacji + 49 cele drop',
+    'TLabel':               'BWS 20 gui_wypisz_tekst_kolor_skala',
+    'TEdit':                'BWS 21 prostokat · 20 tekst · BWS 4 pobierz_znak (edycja)',
+    'TMemo':                'BWS 21 prostokat · 20 tekst linia po linii',
+    'TButton':              'BWS 21 prostokat (ramka) · 20 tekst wysrodkowany · zdarzenie BWS_ZDARZENIE_MYSZ_DOWN',
+    'TCheckBox':            'BWS 21 prostokat · 20 tekst · stan kliknięcia (MYSZ_DOWN)',
+    'TRadioButton':         'BWS 21 prostokat · 20 tekst · stan kliknięcia',
+    'TListBox':             'BWS 21 prostokat · 20 tekst · wybór pozycji klikiem',
+    'TComboBox':            'BWS 21 prostokat · 20 tekst · rozwijana lista (hit-test)',
+    'TScrollBar':           'BWS 21 prostokąty (tor + suwak)',
+    'TGroupBox':            'BWS 21 prostokat · 20 tekst tytułu (kontener)',
+    'TRadioGroup':          'BWS 21 prostokat · 20 tekst opcji',
+    'TPanel':               'BWS 21 prostokat (kontener; dzieci przesuwane razem)',
+    'TActionList':          'logika aplikacji — brak rysowania',
+    'TBitBtn':              'BWS 21 prostokat · 20 tekst',
+    'TSpeedButton':         'BWS 21 prostokat płaski · 20 tekst',
+    'TMaskEdit':            'BWS 21 prostokat · 20 tekst · BWS 4 klawiatura',
+    'TStringGrid':          'BWS 21 siatka (linie) · 20 tekst nagłówków/komórek',
+    'TDrawGrid':            'BWS 21 siatka (linie)',
+    'TImage':               'BWS 21 ramka/wypełnienie · 20 podpis (miejsce na grafikę)',
+    'TShape':               'BWS 21 wypełniony kształt kolorem tła',
+    'TBevel':               'BWS 21 linie 3D (jasna/ciemna krawędź)',
+    'TScrollBox':           'BWS 21 panel + pasek przewijania',
+    'TCheckListBox':        'BWS 21 prostokat · 20 tekst · pola wyboru',
+    'TSplitter':            'BWS 21 rozdzielacz (przesuwny pasek)',
+    'TStaticText':          'BWS 20 tekst',
+    'TControlBar':          'BWS 21 pasek narzędziowy · 20 tekst',
+    'TApplicationEvents':   'BWS 37/38 zdarzenia systemowe procesu',
+    'TValueListEditor':     'BWS 21 siatka klucz|wartość · 20 tekst',
+    'TLabeledEdit':         'BWS 20 etykieta · 21 pole edycji',
+    'TColorBox':            'BWS 21 próbki kolorów · 20 tekst',
+    'TCategoryButtons':     'BWS 21 przyciski kategorii · 20 tekst',
+    'TTabSet':              'BWS 21 zakładki · 20 tekst',
+    'TTabControl':          'BWS 21 zakładki + panel zawartości · 20 tekst',
+    'TPageControl':         'BWS 21 zakładki + panel zawartości · 20 tekst',
+    'TImageList':           'zasoby obrazów — brak rysowania',
+    'TRichEdit':            'BWS 21 prostokat · 20 tekst (wieloliniowy)',
+    'TTrackBar':            'BWS 21 tor + suwak · wartość klikiem (MYSZ_DOWN)',
+    'TProgressBar':         'BWS 21 prostokat postępu',
+    'TUpDown':              'BWS 21 strzałki góra/dół · 20 tekst',
+    'THotKey':              'BWS 21 pole skrótu · 20 tekst',
+    'TAnimate':             'BWS 21 ramka animacji (placeholder)',
+    'TDateTimePicker':      'BWS 21 pole daty · 20 tekst · BWS 9 RTC',
+    'TMonthCalendar':       'BWS 21 siatka kalendarza · 20 tekst',
+    'TTreeView':            'BWS 21 drzewo (wcięcia) · 20 tekst węzłów',
+    'TListView':            'BWS 21 lista + nagłówki kolumn · 20 tekst',
+    'THeaderControl':       'BWS 21 sekcje nagłówka · 20 tekst',
+    'TStatusBar':           'BWS 21 prostokat · 20 tekst statusu',
+    'TToolBar':             'BWS 21 przyciski paska · 20 tekst',
+    'TCoolBar':             'BWS 21 pasy narzędzi · 20 tekst',
+    'TXPManifest':          'brak odpowiednika BWS — znacznik stylu',
+    'TTimer':               'BWS_ZDARZENIE_TIMER (5) przez gui_czekaj_na_zdarzenie (38)',
+    'TPaintBox':            'BWS 21 powierzchnia rysowania (prostokat)',
+    'TMediaPlayer':         'BWS 27 dźwięk HDA · 21 przyciski transportu',
+    'TOleContainer':        'BWS 21 kontener obiektu (ramka)',
+    'TOpenDialog':          'BWS 6 wylistuj_katalog · 5 czytaj_plik',
+    'TSaveDialog':          'BWS 3 zapisz_plik · 2 utworz_plik',
+    'TFontDialog':          'BWS 24 szerokość znaku · 51 wysokość fontu',
+    'TColorDialog':         'BWS 21 próbki · 20 tekst (wybór koloru)',
+    'TPrintDialog':         'brak drukarki w ABI BWS — stub',
+    'TFindDialog':          'BWS 6 wylistuj_katalog (wyszukiwanie plików)',
+    'TDBGrid':              'BWS 21 siatka danych · 20 tekst',
+    'TDBNavigator':         'BWS 21 przyciski nawigacji',
+    'TDBText':              'BWS 20 tekst',
+    'TDBEdit':              'BWS 21 pole edycji · 20 tekst',
+    'TDBImage':             'BWS 21 ramka obrazu · 20 podpis',
+    'TDBComboBox':          'BWS 21 lista rozwijana · 20 tekst',
+    'TDBCheckBox':          'BWS 21 pole wyboru · 20 tekst'
+};
+
+function bwsApiForType(type) {
+    return TYPE_BWS_MAP[type] || 'komponent ogólny: BWS 21 prostokat · 20 tekst';
+}
+
+Object.assign(window, { BWS_ZDARZENIA, BWS_STRUKTURY, BWS_SYSCALLS, TYPE_BWS_MAP, bwsApiForType });

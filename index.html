@@ -47,11 +47,15 @@
         <input type="file" id="file-upload" class="hidden" accept=".json" onchange="loadJSON(event)">
     </header>
 
+    <!-- Zakladki formularzy: okno glowne + okna podrzedne -->
+    <div id="form-tabs" class="flex gap-1 px-2 py-1 bg-carbon-950 border-b border-carbon-800 overflow-x-auto shrink-0"></div>
+
     <div class="flex flex-1 overflow-hidden relative">
         <aside class="w-72 bg-carbon-900 border-r border-carbon-800 flex flex-col z-10 shadow-xl">
             <div class="border-b border-carbon-800 bg-carbon-950 h-1/2 overflow-y-auto custom-scrollbar flex flex-col relative">
-                <div class="sticky top-0 bg-carbon-950 z-20 p-2 border-b border-carbon-800 shadow-sm flex justify-between items-center">
-                    <h2 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Paleta Komponentów</h2>
+                <div class="sticky top-0 bg-carbon-950 z-20 p-2 border-b border-carbon-800 shadow-sm">
+                    <h2 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">Paleta Komponentów</h2>
+                    <input id="palette-search" type="text" placeholder="🔍 Szukaj komponentu..." oninput="setPaletteFilter(this.value)" class="w-full bg-carbon-900 border border-carbon-700 rounded px-2 py-1 text-[11px] text-gray-200 placeholder-gray-600 focus:outline-none focus:border-bursztyn-500">
                 </div>
                 <div id="palette-container" class="p-2 pb-10 flex flex-col gap-1"></div>
             </div>
@@ -105,6 +109,7 @@
                     <div class="text-[10px] text-gray-400" id="visual-modal-target-name">Komponent: -</div>
                 </div>
                 <div class="flex gap-2">
+                    <button onclick="toggleVisualFullscreen()" id="btn-visual-fs" class="bg-carbon-700 hover:bg-carbon-600 text-white px-3 py-1.5 rounded text-sm font-bold shadow-sm transition-colors" title="Praca na pełnym ekranie">⛶ Pełny ekran</button>
                     <button onclick="saveVisualModal()" class="bg-bursztyn-600 hover:bg-bursztyn-500 text-white px-6 py-1.5 rounded text-sm font-bold shadow-sm transition-colors">✅ Zapisz i Zamknij</button>
                     <button onclick="closeVisualModal()" class="bg-carbon-700 hover:bg-carbon-600 text-white px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors">Anuluj</button>
                 </div>
@@ -112,18 +117,33 @@
 
             <div class="flex flex-1 overflow-hidden">
                 <div class="w-64 bg-carbon-950 border-r border-carbon-800 flex flex-col">
-                    <div class="p-3 border-b border-carbon-800">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Szablony API</h3>
-                        <div class="text-[9px] text-gray-500 leading-tight">Pełne wywołania systemowe BWS 1–56 (syscalls.cpp) i wrappery bursztyn_gui.h.</div>
+                    <div class="p-2 border-b border-carbon-800">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Bloki</h3>
+                        <input id="blocks-search" type="text" placeholder="🔍 Szukaj akcji..." oninput="setBlockFilter(this.value)" class="w-full bg-carbon-900 border border-carbon-700 rounded px-2 py-1 text-[10px] text-gray-200 placeholder-gray-600 focus:outline-none focus:border-bursztyn-500">
                     </div>
-                    <div class="p-3 flex-1 overflow-y-auto custom-scrollbar">
+                    <div class="p-2 flex-1 overflow-y-auto custom-scrollbar">
                         <div class="flex flex-col gap-1" id="blocks-palette"></div>
                     </div>
                 </div>
 
-                <div class="flex-1 bg-carbon-900 p-4 overflow-y-auto relative custom-scrollbar" id="visual-workspace">
-                    <div class="text-gray-500 text-xs italic mb-4">Wykonywane po kliknięciu / interakcji z obiektem:</div>
-                    <div id="visual-blocks-container" class="flex flex-col gap-2 pb-10"></div>
+                <div class="flex-1 relative bg-carbon-900" id="visual-workspace">
+                    <div id="ws-scroll" class="absolute inset-0 overflow-auto custom-scrollbar pt-9 pl-4 pr-4 pb-16">
+                        <div class="absolute top-2 left-4 text-gray-500 text-xs italic pointer-events-none">Wykonywane po kliknięciu / interakcji z obiektem:</div>
+                        <div id="ws-canvas"><div id="visual-blocks-container" class="flex flex-col gap-1.5 pb-6"></div></div>
+                    </div>
+
+                    <!-- Rozszerzenia (lewy dolny rog) -->
+                    <button onclick="toggleExtMenu()" class="absolute left-3 bottom-3 z-30 bg-carbon-800 hover:bg-carbon-700 border border-bursztyn-800 text-bursztyn-400 px-3 py-1.5 rounded text-[11px] font-bold shadow-lg">➕ Dodaj rozszerzenie</button>
+                    <div id="ext-menu" class="hidden absolute left-3 bottom-12 z-40 bg-carbon-800 border border-carbon-700 rounded-lg shadow-2xl py-1 w-56"></div>
+
+                    <!-- Zoom obszaru roboczego (prawy dolny rog) -->
+                    <div class="absolute right-3 bottom-3 z-30 flex items-center gap-1 bg-carbon-950/95 border border-carbon-700 rounded-lg px-1.5 py-1 shadow-xl select-none">
+                        <span class="text-[9px] text-gray-500 uppercase tracking-widest mr-1">Zoom</span>
+                        <button onclick="setWsZoom('in')" title="Przybliż" class="ws-btn ws-btn-zoom">🔍＋</button>
+                        <button onclick="setWsZoom('out')" title="Oddal" class="ws-btn ws-btn-zoom">🔍－</button>
+                        <button onclick="setWsZoom('reset')" title="Reset 100%" class="ws-btn ws-btn-zoom">🔍＝</button>
+                        <span id="ws-zoom-label" class="text-[9px] text-gray-400 w-9 text-right font-mono">100%</span>
+                    </div>
                 </div>
             </div>
         </div>

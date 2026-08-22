@@ -56,3 +56,110 @@
 .api-name { color: #E5E7EB; font-family: monospace; font-size: 12px; white-space: nowrap; }
 .api-desc { color: #9CA3AF; font-size: 11px; }
 .api-group-tag { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #E58A00; border: 1px solid #8A5A00; border-radius: 3px; padding: 1px 5px; white-space: nowrap; }
+
+/* Zakladki formularzy (okno glowne / okna podrzedne) */
+.form-tab {
+    padding: 3px 12px; font-size: 11px; font-weight: bold;
+    background: #1C1C1C; color: #9CA3AF;
+    border: 1px solid #333; border-bottom: none;
+    border-radius: 6px 6px 0 0; cursor: pointer; white-space: nowrap;
+    transition: background 0.1s;
+}
+.form-tab:hover { color: #E5E7EB; }
+.form-tab.active { background: #CC7A00; color: #FFF; border-color: #E58A00; }
+
+/* Drzewo obiektow - przeciaganie w celu zmiany z-order */
+.tree-item.tree-over { outline: 2px dashed #FFBF00; outline-offset: -2px; background: rgba(255,191,0,0.12); }
+.tree-item[draggable="true"] { cursor: grab; }
+
+/* Klocki palety (Scratch) */
+.block-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-left: 5px solid;
+    border-radius: 10px; cursor: grab; text-align: left; width: 100%;
+    transition: filter 0.1s, transform 0.05s;
+}
+.block-chip:hover { filter: brightness(1.25); }
+.block-chip:active { cursor: grabbing; transform: scale(0.98); }
+.block-chip.hat-block { border-radius: 16px 16px 8px 8px; padding-top: 9px; }
+
+/* Klocki obszaru roboczego */
+.ws-block {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: linear-gradient(180deg, var(--blk) 0%, rgba(0,0,0,0.25) 160%);
+    border-radius: 10px; padding: 7px 9px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.45);
+    cursor: grab; user-select: none; color: #111;
+}
+.ws-block:active { cursor: grabbing; }
+.ws-block.hat { border-radius: 18px 18px 8px 8px; padding-top: 11px; }
+.ws-block .text-\[11px\] { color: #111; text-shadow: 0 1px 0 rgba(255,255,255,0.25); }
+.ws-input {
+    background: rgba(255,255,255,0.88); color: #111;
+    border: 1px solid rgba(0,0,0,0.35); border-radius: 5px;
+    padding: 2px 5px; font-size: 10px; font-weight: 600;
+    min-width: 0; width: 100%;
+    font-family: ui-monospace, monospace;
+}
+.ws-btn {
+    background: rgba(0,0,0,0.28); color: #fff;
+    border-radius: 5px; padding: 2px 6px; font-size: 10px; line-height: 1.2;
+}
+.ws-btn:hover { background: rgba(0,0,0,0.45); }
+.ws-btn-del:hover { background: #AA0000; }
+.ws-btn-zoom { background: transparent; font-size: 12px; padding: 3px 6px; border-radius: 5px; color: #D1D5DB; }
+.ws-btn-zoom:hover { background: #374151; color: #fff; }
+
+/* Podpisy pol w klockach - zawsze widoczne nad polem */
+.ws-field { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ws-lbl {
+    font-size: 8px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 0.06em; line-height: 1.1;
+    color: rgba(0,0,0,0.62);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+}
+.ws-help {
+    background: rgba(0,0,0,0.3); color: #fff;
+    border-radius: 50%; width: 15px; height: 15px;
+    font-size: 9px; font-weight: 900; padding: 0; line-height: 1;
+}
+.ws-help:hover { background: #FFBF00; color: #000; }
+
+/* Dymek pomocy bloku */
+#bws-help-pop {
+    display: none; position: fixed; z-index: 30000;
+    background: #1C1C1C; color: #E5E7EB;
+    border: 1px solid #8A5A00; border-radius: 10px;
+    padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    max-height: 70vh; overflow-y: auto;
+}
+
+/* Pelny ekran edytora wizualnego (tryb CSS + natywny) */
+#visual-modal.fs-mode > div,
+#visual-modal:fullscreen > div,
+#visual-modal:-webkit-full-screen > div {
+    max-width: none !important; max-height: none !important;
+    width: 100vw !important; height: 100vh !important;
+    border-radius: 0 !important; border: none !important;
+}
+#visual-modal.fs-mode, #visual-modal:fullscreen, #visual-modal:-webkit-full-screen {
+    padding: 0 !important; background: #121212 !important; backdrop-filter: none !important;
+}
+.ws-missing {
+    background: repeating-linear-gradient(45deg, #AA0000 0 8px, #7A0000 8px 16px);
+    color: #fff;
+}
+
+/* Strefy wstawiania miedzy klockami */
+.ws-insert { height: 4px; margin: -1px 0; border-radius: 2px; pointer-events: auto; min-height: 4px; }
+.ws-insert.active { background: #FFBF00; box-shadow: 0 0 8px rgba(255,191,0,0.8); }
+
+/* Problik kolorow - kropki pozycji na kwadracie SV i pasie odcienia */
+.bws-dot-sv, .bws-dot-hue {
+    position: absolute; width: 10px; height: 10px;
+    border: 2px solid #fff; border-radius: 50%;
+    box-shadow: 0 0 3px rgba(0,0,0,0.8);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
