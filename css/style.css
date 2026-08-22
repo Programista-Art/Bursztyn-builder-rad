@@ -1,0 +1,58 @@
+/* =========================================================================
+ * Bursztyn Builder RAD v3.0 - style interfejsu
+ * ========================================================================= */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #1f2937; }
+::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #E58A00; }
+
+#canvas-container {
+    background-image:
+        linear-gradient(#2D2D2D 1px, transparent 1px),
+        linear-gradient(90deg, #2D2D2D 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-color: #121212;
+}
+
+.element-node { position: absolute; cursor: grab; user-select: none; box-sizing: border-box; transition: box-shadow 0.1s; }
+.element-node:active { cursor: grabbing; }
+
+.element-node.selected:not(.window-node) {
+    outline: 2px dashed #FFBF00; outline-offset: 2px;
+    box-shadow: 0 0 15px rgba(255, 191, 0, 0.4); z-index: 1000 !important;
+}
+.element-node.selected.window-node { outline: 2px dashed #FFBF00; outline-offset: 2px; box-shadow: 0 0 15px rgba(255, 191, 0, 0.4); }
+
+.resize-handle { position: absolute; width: 8px; height: 8px; background: #FFBF00; border: 1px solid #1A0B00; border-radius: 50%; z-index: 1001; }
+.resize-nw { top: -4px; left: -4px; cursor: nwse-resize; }
+.resize-n  { top: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+.resize-ne { top: -4px; right: -4px; cursor: nesw-resize; }
+.resize-e  { top: calc(50% - 4px); right: -4px; cursor: ew-resize; }
+.resize-se { bottom: -4px; right: -4px; cursor: nwse-resize; }
+.resize-s  { bottom: -4px; left: calc(50% - 4px); cursor: ns-resize; }
+.resize-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
+.resize-w  { top: calc(50% - 4px); left: -4px; cursor: ew-resize; }
+
+.tree-item { cursor: pointer; border: 1px solid transparent; }
+.tree-item.drag-over { border-top: 2px solid #FFBF00; background: rgba(255,191,0,0.1); }
+
+.ctx-item { padding: 8px 12px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #2D2D2D; transition: background 0.1s; }
+.ctx-item:hover { background: #2D2D2D; }
+.ctx-item:last-child { border-bottom: none; }
+
+.accordion-content { display: none; }
+.accordion-content.open { display: grid; }
+
+.visual-block { background: linear-gradient(180deg, #374151 0%, #1f2937 100%); border-left: 4px solid #E58A00; }
+
+.modal { display: none; }
+.modal.active { display: flex; }
+
+/* Przegladarka API BWS */
+.api-row { display: flex; gap: 8px; padding: 6px 8px; border-bottom: 1px solid #2D2D2D; align-items: baseline; }
+.api-row:hover { background: #1C1C1C; }
+.api-nr { min-width: 44px; color: #FFBF00; font-weight: bold; font-family: monospace; font-size: 11px; }
+.api-name { color: #E5E7EB; font-family: monospace; font-size: 12px; white-space: nowrap; }
+.api-desc { color: #9CA3AF; font-size: 11px; }
+.api-group-tag { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #E58A00; border: 1px solid #8A5A00; border-radius: 3px; padding: 1px 5px; white-space: nowrap; }

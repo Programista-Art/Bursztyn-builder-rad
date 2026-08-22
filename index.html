@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bursztyn OS - Builder RAD v2.8 Ultimate</title>
+    <title>Bursztyn OS - Builder RAD v3.0 Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Monaco Editor Loader -->
     <script>var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } };</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/editor/editor.main.nls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/editor/editor.main.js"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -23,51 +23,7 @@
             }
         }
     </script>
-    <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #E58A00; }
-
-        #canvas-container {
-            background-image: 
-                linear-gradient(#2D2D2D 1px, transparent 1px),
-                linear-gradient(90deg, #2D2D2D 1px, transparent 1px);
-            background-size: 20px 20px;
-            background-color: #121212;
-        }
-
-        .element-node { position: absolute; cursor: grab; user-select: none; box-sizing: border-box; transition: box-shadow 0.1s; }
-        .element-node:active { cursor: grabbing; }
-        
-        .element-node.selected:not(.window-node) { 
-            outline: 2px dashed #FFBF00; outline-offset: 2px;
-            box-shadow: 0 0 15px rgba(255, 191, 0, 0.4); z-index: 1000 !important;
-        }
-        .element-node.selected.window-node { outline: 2px dashed #FFBF00; outline-offset: 2px; box-shadow: 0 0 15px rgba(255, 191, 0, 0.4); }
-
-        .resize-handle { position: absolute; width: 8px; height: 8px; background: #FFBF00; border: 1px solid #1A0B00; border-radius: 50%; z-index: 1001; }
-        .resize-nw { top: -4px; left: -4px; cursor: nwse-resize; }
-        .resize-n  { top: -4px; left: calc(50% - 4px); cursor: ns-resize; }
-        .resize-ne { top: -4px; right: -4px; cursor: nesw-resize; }
-        .resize-e  { top: calc(50% - 4px); right: -4px; cursor: ew-resize; }
-        .resize-se { bottom: -4px; right: -4px; cursor: nwse-resize; }
-        .resize-s  { bottom: -4px; left: calc(50% - 4px); cursor: ns-resize; }
-        .resize-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
-        .resize-w  { top: calc(50% - 4px); left: -4px; cursor: ew-resize; }
-
-        .tree-item { cursor: pointer; border: 1px solid transparent; }
-        .tree-item.drag-over { border-top: 2px solid #FFBF00; background: rgba(255,191,0,0.1); }
-        .ctx-item { padding: 8px 12px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #2D2D2D; transition: background 0.1s; }
-        .ctx-item:hover { background: #2D2D2D; }
-        .ctx-item:last-child { border-bottom: none; }
-        .accordion-content { display: none; }
-        .accordion-content.open { display: grid; }
-        .visual-block { background: linear-gradient(180deg, #374151 0%, #1f2937 100%); border-left: 4px solid #E58A00; }
-        
-        .modal { display: none; }
-        .modal.active { display: flex; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-carbon-950 text-gray-200 font-sans h-screen flex flex-col overflow-hidden">
 
@@ -75,8 +31,8 @@
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 bg-gradient-to-br from-bursztyn-400 to-bursztyn-600 rounded shadow-[0_0_10px_rgba(229,138,0,0.4)] flex items-center justify-center font-bold text-black">B</div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-wide leading-tight">Bursztyn <span class="text-bursztyn-400 font-light">Builder RAD v2.9</span></h1>
-                <div class="text-[10px] text-gray-400 uppercase tracking-widest">Ultimate VCL Edition — poprawki</div>
+                <h1 class="text-lg font-bold text-white tracking-wide leading-tight">Bursztyn <span class="text-bursztyn-400 font-light">Builder RAD v3.0</span></h1>
+                <div class="text-[10px] text-gray-400 uppercase tracking-widest">Ultimate VCL Edition — modułowo · pełne API BWS 1–56</div>
             </div>
         </div>
         <div class="flex gap-2">
@@ -85,6 +41,7 @@
             <div class="w-px h-6 bg-carbon-700 mx-1 self-center"></div>
             <button onclick="clearCanvas()" class="bg-carbon-800 hover:bg-carbon-700 text-gray-300 px-3 py-1.5 rounded text-sm transition-colors border border-carbon-700 shadow-sm">Wyczyść Płótno</button>
             <div class="w-px h-6 bg-carbon-700 mx-1 self-center"></div>
+            <button onclick="openApiBrowser()" class="bg-carbon-800 hover:bg-carbon-700 text-bursztyn-400 px-3 py-1.5 rounded text-sm font-bold transition-colors border border-bursztyn-800 shadow-sm">📚 API BWS</button>
             <button onclick="openMonacoModal()" class="bg-bursztyn-600 hover:bg-bursztyn-500 text-white px-5 py-1.5 rounded text-sm font-bold shadow-lg transition-colors flex items-center gap-2">💻 Podgląd / Eksport C++</button>
         </div>
         <input type="file" id="file-upload" class="hidden" accept=".json" onchange="loadJSON(event)">
@@ -98,7 +55,7 @@
                 </div>
                 <div id="palette-container" class="p-2 pb-10 flex flex-col gap-1"></div>
             </div>
-            
+
             <div class="p-3 flex-1 h-1/2 overflow-y-auto custom-scrollbar relative">
                 <div class="sticky top-[-12px] bg-carbon-900 py-2 z-20 shadow-sm mb-2">
                     <h2 class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Drzewo Obiektów</h2>
@@ -125,6 +82,7 @@
         </aside>
     </div>
 
+    <!-- Modal: podglad / eksport kodu C++ -->
     <div id="code-modal" class="modal fixed inset-0 bg-black/80 z-[20000] items-center justify-center p-8 backdrop-blur-sm">
         <div class="bg-carbon-900 border border-carbon-700 rounded-lg shadow-2xl w-full h-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="p-4 border-b border-carbon-800 flex justify-between items-center bg-carbon-950">
@@ -138,6 +96,7 @@
         </div>
     </div>
 
+    <!-- Modal: wizualny edytor logiki -->
     <div id="visual-modal" class="modal fixed inset-0 bg-black/80 z-[20000] items-center justify-center p-8 backdrop-blur-sm">
         <div class="bg-carbon-900 border border-carbon-700 rounded-lg shadow-2xl w-full h-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden">
             <div class="p-4 border-b border-carbon-800 flex justify-between items-center bg-carbon-950">
@@ -150,17 +109,18 @@
                     <button onclick="closeVisualModal()" class="bg-carbon-700 hover:bg-carbon-600 text-white px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors">Anuluj</button>
                 </div>
             </div>
-            
+
             <div class="flex flex-1 overflow-hidden">
                 <div class="w-64 bg-carbon-950 border-r border-carbon-800 flex flex-col">
                     <div class="p-3 border-b border-carbon-800">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Szablony API</h3>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Szablony API</h3>
+                        <div class="text-[9px] text-gray-500 leading-tight">Pełne wywołania systemowe BWS 1–56 (syscalls.cpp) i wrappery bursztyn_gui.h.</div>
                     </div>
-                    <div class="p-3 flex-1 overflow-y-auto">
+                    <div class="p-3 flex-1 overflow-y-auto custom-scrollbar">
                         <div class="flex flex-col gap-1" id="blocks-palette"></div>
                     </div>
                 </div>
-                
+
                 <div class="flex-1 bg-carbon-900 p-4 overflow-y-auto relative custom-scrollbar" id="visual-workspace">
                     <div class="text-gray-500 text-xs italic mb-4">Wykonywane po kliknięciu / interakcji z obiektem:</div>
                     <div id="visual-blocks-container" class="flex flex-col gap-2 pb-10"></div>
@@ -169,988 +129,32 @@
         </div>
     </div>
 
-    <script>
-        let elements = [];
-        let deletedElements = []; 
-        let elementIdCounter = 1;
-        let selectedId = null;
-        let monacoInst = null;
-        let activeVisualTargetId = null;
-        let tempVisualEvents = []; 
-
-        const OS_COLORS = {
-            AmberDark: '0xFF1A0B00', AmberMid: '0xFF8A5A00', AmberLight: '0xFFFFBF00',
-            CarbonBg: '0xFF1C1C1C', CarbonPanel: '0xFF2D2D2D', CarbonBorder: '0xFF404040',
-            AccentBlue: '0xFF0078D7', AccentRed: '0xFFAA0000', White: '0xFFFFFFFF', Black: '0xFF000000',
-            Transparent: '0x00000000' 
-        };
-
-        const canvas = document.getElementById('canvas');
-        const propertiesPanel = document.getElementById('properties-panel');
-        const treePanel = document.getElementById('element-tree');
-        const ctxMenu = document.getElementById('context-menu');
-
-        let isDragging = false, isResizing = false;
-        let resizeDir = '', dragTarget = null;
-        let startX, startY, initialX, initialY, initialW, initialH;
-
-        // Lista typow, ktore w wygenerowanej aplikacji reaguja na klikniecie
-        // (moga miec przypiety wlasny kod / akcje w Edytorze Wizualnym).
-        const EVENTOWALNE_TYPY = [
-            'TButton', 'TBitBtn', 'TSpeedButton', 'TCheckBox', 'TRadioButton',
-            'TComboBox', 'TListBox', 'TCheckListBox', 'TRadioGroup',
-            'TEdit', 'TMemo', 'TLabeledEdit', 'TMaskEdit',
-            'TTrackBar', 'TDateTimePicker', 'TTreeView', 'TListView'
-        ];
-
-        // Potężna baza danych komponentów Delphi/VCL w Bursztyn Builderze
-        const COMPONENT_DB = {
-            "Podstawowe (Standard)": [
-                { type: 'window', icon: '🔲', name: 'Okno (Form)', w:600, h:450 },
-                { type: 'TMainMenu', icon: '📑', name: 'TMainMenu', w:400, h:24 },
-                { type: 'TPopupMenu', icon: '🖱️', name: 'TPopupMenu', w:32, h:32, n:true },
-                { type: 'TLabel', icon: 'A', name: 'TLabel', w:60, h:20 },
-                { type: 'TEdit', icon: '✏️', name: 'TEdit', w:120, h:24 },
-                { type: 'TMemo', icon: '📝', name: 'TMemo', w:150, h:100 },
-                { type: 'TButton', icon: '🔘', name: 'TButton', w:100, h:30 },
-                { type: 'TCheckBox', icon: '☑️', name: 'TCheckBox', w:100, h:20 },
-                { type: 'TRadioButton', icon: '🔵', name: 'TRadioButton', w:100, h:20 },
-                { type: 'TListBox', icon: '📜', name: 'TListBox', w:120, h:100 },
-                { type: 'TComboBox', icon: '🔽', name: 'TComboBox', w:120, h:24 },
-                { type: 'TScrollBar', icon: '↕️', name: 'TScrollBar', w:20, h:100 },
-                { type: 'TGroupBox', icon: '🗃️', name: 'TGroupBox', w:200, h:100 },
-                { type: 'TRadioGroup', icon: '🔘', name: 'TRadioGroup', w:150, h:100 },
-                { type: 'TPanel', icon: '🗂️', name: 'TPanel', w:200, h:150 },
-                { type: 'TActionList', icon: '⚡', name: 'TActionList', w:32, h:32, n:true }
-            ],
-            "Rozszerzone (Additional)": [
-                { type: 'TBitBtn', icon: '🖼️', name: 'TBitBtn', w:100, h:30 },
-                { type: 'TSpeedButton', icon: '🚀', name: 'TSpeedButton', w:30, h:30 },
-                { type: 'TMaskEdit', icon: '🎭', name: 'TMaskEdit', w:120, h:24 },
-                { type: 'TStringGrid', icon: '▦', name: 'TStringGrid', w:200, h:150 },
-                { type: 'TDrawGrid', icon: '🎨', name: 'TDrawGrid', w:200, h:150 },
-                { type: 'TImage', icon: '🌄', name: 'TImage', w:100, h:100 },
-                { type: 'TShape', icon: '🟦', name: 'TShape', w:50, h:50 },
-                { type: 'TBevel', icon: '🧊', name: 'TBevel', w:100, h:5 },
-                { type: 'TScrollBox', icon: '📦', name: 'TScrollBox', w:200, h:150 },
-                { type: 'TCheckListBox', icon: '✅', name: 'TCheckListBox', w:150, h:100 },
-                { type: 'TSplitter', icon: '↔️', name: 'TSplitter', w:5, h:100 },
-                { type: 'TStaticText', icon: 'T', name: 'TStaticText', w:100, h:20 },
-                { type: 'TControlBar', icon: '🛠️', name: 'TControlBar', w:300, h:30 },
-                { type: 'TApplicationEvents', icon: '⚙️', name: 'TAppEvents', w:32, h:32, n:true },
-                { type: 'TValueListEditor', icon: '📋', name: 'TValListEd', w:200, h:150 },
-                { type: 'TLabeledEdit', icon: '🏷️', name: 'TLabeledEdit', w:120, h:40 },
-                { type: 'TColorBox', icon: '🎨', name: 'TColorBox', w:120, h:24 },
-                { type: 'TCategoryButtons', icon: '🗂️', name: 'TCatButtons', w:150, h:200 },
-                { type: 'TTabSet', icon: '📑', name: 'TTabSet', w:300, h:25 }
-            ],
-            "Złożone (Zaawansowane)": [
-                { type: 'TTabControl', icon: '🗂️', name: 'TTabControl', w:300, h:200 },
-                { type: 'TPageControl', icon: '📑', name: 'TPageControl', w:300, h:200 },
-                { type: 'TImageList', icon: '🖼️', name: 'TImageList', w:32, h:32, n:true },
-                { type: 'TRichEdit', icon: '📝', name: 'TRichEdit', w:200, h:150 },
-                { type: 'TTrackBar', icon: '🎚️', name: 'TTrackBar', w:150, h:30 },
-                { type: 'TProgressBar', icon: '⏳', name: 'TProgressBar', w:150, h:20 },
-                { type: 'TUpDown', icon: '↕️', name: 'TUpDown', w:20, h:24 },
-                { type: 'THotKey', icon: '⌨️', name: 'THotKey', w:100, h:24 },
-                { type: 'TAnimate', icon: '🎬', name: 'TAnimate', w:100, h:100 },
-                { type: 'TDateTimePicker', icon: '📅', name: 'TDateTimePick', w:120, h:24 },
-                { type: 'TMonthCalendar', icon: '📆', name: 'TMonthCal', w:200, h:160 },
-                { type: 'TTreeView', icon: '🌳', name: 'TTreeView', w:150, h:200 },
-                { type: 'TListView', icon: '📄', name: 'TListView', w:200, h:150 },
-                { type: 'THeaderControl', icon: '🔝', name: 'THeaderCtrl', w:300, h:20 },
-                { type: 'TStatusBar', icon: '🚥', name: 'TStatusBar', w:400, h:20 },
-                { type: 'TToolBar', icon: '🛠️', name: 'TToolBar', w:400, h:30 },
-                { type: 'TCoolBar', icon: '🧊', name: 'TCoolBar', w:400, h:30 },
-                { type: 'TXPManifest', icon: '⚙️', name: 'TXPManifest', w:32, h:32, n:true }
-            ],
-            "Systemowe i Multimedia": [
-                { type: 'TTimer', icon: '⏱️', name: 'TTimer', w:32, h:32, n:true },
-                { type: 'TPaintBox', icon: '🖌️', name: 'TPaintBox', w:100, h:100 },
-                { type: 'TMediaPlayer', icon: '⏯️', name: 'TMediaPlayer', w:250, h:30 },
-                { type: 'TOleContainer', icon: '📦', name: 'TOleContainer', w:100, h:100 }
-            ],
-            "Dialogi (Dialogs)": [
-                { type: 'TOpenDialog', icon: '📂', name: 'TOpenDialog', w:32, h:32, n:true },
-                { type: 'TSaveDialog', icon: '💾', name: 'TSaveDialog', w:32, h:32, n:true },
-                { type: 'TFontDialog', icon: '🔤', name: 'TFontDialog', w:32, h:32, n:true },
-                { type: 'TColorDialog', icon: '🎨', name: 'TColorDialog', w:32, h:32, n:true },
-                { type: 'TPrintDialog', icon: '🖨️', name: 'TPrintDialog', w:32, h:32, n:true },
-                { type: 'TFindDialog', icon: '🔍', name: 'TFindDialog', w:32, h:32, n:true }
-            ],
-            "Bazy Danych (Data Controls)": [
-                { type: 'TDBGrid', icon: '▦', name: 'TDBGrid', w:300, h:150 },
-                { type: 'TDBNavigator', icon: '⏮️', name: 'TDBNav', w:240, h:25 },
-                { type: 'TDBText', icon: 'A', name: 'TDBText', w:60, h:20 },
-                { type: 'TDBEdit', icon: '✏️', name: 'TDBEdit', w:120, h:24 },
-                { type: 'TDBImage', icon: '🖼️', name: 'TDBImage', w:100, h:100 },
-                { type: 'TDBComboBox', icon: '🔽', name: 'TDBCombo', w:120, h:24 },
-                { type: 'TDBCheckBox', icon: '☑️', name: 'TDBCheck', w:100, h:20 }
-            ]
-        };
-
-        const ACTION_TYPES = {
-            'print': { icon: '📝', name: 'Wypisz do konsoli', params: [{name: 'text', label: 'Tekst', type: 'text', default: 'Witaj w Bursztyn OS!'}] },
-            'exec': { icon: '🚀', name: 'Uruchom program', params: [{name: 'path', label: 'Ścieżka', type: 'text', default: '/programy/notatnik.cebula/notatnik.bur'}] },
-            'sound': { icon: '🔊', name: 'Zagraj dźwięk (HDA)', params: [{name: 'hz', label: 'Hz', type: 'number', default: 880}, {name: 'ms', label: 'Czas (ms)', type: 'number', default: 500}] },
-            'exit': { icon: '❌', name: 'Zamknij aplikację', params: [] },
-            'raw': { icon: '💻', name: 'Surowy kod C++', params: [{name: 'code', label: 'Kod', type: 'text', default: 'b_print("Test\\n");'}] }
-        };
-
-        window.onload = () => {
-            buildPalette();
-            addElement('window', 50, 50, 600, 450, 'Aplikacja Bursztyn (VCL Edition)');
-            addElement('TButton', 80, 100, 120, 30, 'Przycisk');
-            addElement('TComboBox', 80, 150, 150, 24, 'Opcja 1\nOpcja 2\nOpcja 3');
-            addElement('TGroupBox', 250, 100, 200, 120, 'Opcje Zasilania');
-            document.addEventListener('mousemove', onGlobalMove);
-            document.addEventListener('mouseup', onGlobalUp);
-            document.addEventListener('click', (e) => { if(!ctxMenu.contains(e.target)) ctxMenu.classList.add('hidden'); });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Delete' && selectedId !== null) {
-                    const active = document.activeElement;
-                    const tag = active && active.tagName;
-                    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-                    deleteSelected();
-                }
-            });
-        };
-
-        function parseBursztynColor(bHex) {
-            let clean = (bHex||'').toString().replace('0x', '');
-            while(clean.length < 8) clean = '0' + clean;
-            let a = parseInt(clean.substring(0,2), 16);
-            let hex = '#' + clean.substring(2);
-            return { a, hex };
-        }
-
-        function buildBursztynColor(a, hex) {
-            let aStr = parseInt(a).toString(16).toUpperCase().padStart(2, '0');
-            let hStr = hex.replace('#', '').toUpperCase();
-            return '0x' + aStr + hStr;
-        }
-
-        function bursztynToRGBA(bHex) {
-            let { a, hex } = parseBursztynColor(bHex);
-            let r = parseInt(hex.substring(1,3), 16) || 0;
-            let g = parseInt(hex.substring(3,5), 16) || 0;
-            let b = parseInt(hex.substring(5,7), 16) || 0;
-            return `rgba(${r}, ${g}, ${b}, ${a / 255.0})`;
-        }
-
-        function toggleAccordion(id) { document.getElementById(id).classList.toggle('open'); }
-
-        function buildPalette() {
-            const container = document.getElementById('palette-container');
-            let html = '';
-            for (const [catName, components] of Object.entries(COMPONENT_DB)) {
-                let catId = 'cat-' + catName.replace(/[^a-zA-Z]/g, '');
-                html += `
-                    <div class="bg-carbon-800 rounded border border-carbon-700 overflow-hidden mb-1">
-                        <button onclick="toggleAccordion('${catId}')" class="w-full text-left px-3 py-1.5 bg-carbon-800 hover:bg-carbon-700 text-[9px] font-bold text-gray-300 border-b border-carbon-700 flex justify-between items-center tracking-widest uppercase">
-                            ${catName} <span class="text-bursztyn-500">▼</span>
-                        </button>
-                        <div id="${catId}" class="accordion-content ${catName.includes('Podstawowe')?'open':''} grid-cols-2 gap-1 p-1 bg-carbon-900">
-                `;
-                components.forEach(comp => {
-                    let textArg = comp.name;
-                    if(['TComboBox', 'TListBox', 'TCheckListBox', 'TMainMenu', 'TPopupMenu'].includes(comp.type)) textArg = "Plik\\nEdycja\\nWidok";
-                    else if (comp.type === 'TRadioGroup') textArg = "Opcje\\nOpcja 1\\nOpcja 2";
-                    
-                    let onClickStr = `addElement('${comp.type}', 100, 100, ${comp.w}, ${comp.h}, '${textArg}')`;
-                    html += `
-                        <button onclick="${onClickStr}" class="flex flex-col items-center justify-center p-2 bg-carbon-950 hover:bg-carbon-800 rounded border border-carbon-800 hover:border-bursztyn-500 transition-all group">
-                            <span class="text-base group-hover:scale-110 transition-transform">${comp.icon}</span>
-                            <span class="text-[9px] text-gray-400 mt-1 text-center leading-tight overflow-hidden text-ellipsis w-full whitespace-nowrap">${comp.name}</span>
-                        </button>
-                    `;
-                });
-                html += `</div></div>`;
-            }
-            container.innerHTML = html;
-
-            let blocksHtml = '';
-            for(let key in ACTION_TYPES) {
-                let act = ACTION_TYPES[key];
-                blocksHtml += `<button onclick="addVisualEventModal('${key}')" class="flex items-center gap-2 p-2 bg-carbon-800 hover:bg-carbon-700 border border-carbon-700 rounded text-left transition-colors"><span class="text-lg">${act.icon}</span><div class="text-[10px] font-bold text-gray-200">${act.name}</div></button>`;
-            }
-            document.getElementById('blocks-palette').innerHTML = blocksHtml;
-        }
-
-        function addElement(type, x=100, y=100, w=120, h=30, text="") {
-            const id = elementIdCounter++;
-            let zIndex = elements.length;
-            let el = { id, type, x, y, w, h, z: zIndex, name: `${type}_${id}`, onClick: '', visualEvents: [], eventMode: 'visual' };
-
-            if (type === 'window') { el.text = text || "Aplikacja Bursztyn"; el.bg = OS_COLORS.CarbonBg; } 
-            else if (type === 'TPanel' || type.includes('Grid') || type === 'TGroupBox' || type === 'TRadioGroup') { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.CarbonBorder; el.text = text; } 
-            else if (type === 'TButton' || type === 'TBitBtn') { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.White; el.text = text; } 
-            else if (type === 'TLabel' || type === 'TCheckBox' || type === 'TRadioButton') { el.bg = OS_COLORS.Transparent; el.color = OS_COLORS.White; el.scale = 1; el.text = text; } 
-            else if (type === 'TListBox' || type === 'TMemo' || type === 'TEdit' || type === 'TComboBox' || type === 'TCheckListBox') { el.bg = OS_COLORS.White; el.color = OS_COLORS.Black; el.text = text; }
-            else if (type === 'TProgressBar') { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.AccentBlue; el.value = 50; }
-            else if (type === 'TShape') { el.bg = OS_COLORS.AccentBlue; }
-            else if (type === 'TStatusBar') { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.White; el.text = 'Gotowy.'; }
-            else { el.bg = OS_COLORS.CarbonPanel; el.color = OS_COLORS.White; el.text = text; } 
-
-            elements.push(el); selectElement(id); updateUI();
-        }
-
-        function deleteSelected() {
-            if (!selectedId) return;
-            const el = elements.find(e => e.id === selectedId);
-            if (el) { deletedElements.push({...el}); elements = elements.filter(e => e.id !== selectedId); selectedId = null; updateUI(); }
-        }
-
-        function clearCanvas() { elements = []; deletedElements = []; selectedId = null; updateUI(); }
-        function selectElement(id) { selectedId = id; updateUI(); }
-
-        window.updateElementProp = function(id, prop, value) {
-            const el = elements.find(e => e.id === id);
-            if (el) {
-                if (['x', 'y', 'w', 'h', 'z', 'scale', 'value'].includes(prop)) el[prop] = parseInt(value) || 0;
-                else el[prop] = value;
-                if (prop === 'z') { elements.sort((a,b) => a.z - b.z); elements.forEach((e, idx) => e.z = idx); }
-                updateUI();
-            }
-        }
-
-        window.updateColor = function(prop, hex, alpha) {
-            if (selectedId) updateElementProp(selectedId, prop, buildBursztynColor(alpha, hex));
-        };
-
-        function saveJSON() {
-            const data = JSON.stringify(elements, null, 2);
-            const blob = new Blob([data], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'projekt_bursztyn.json';
-            a.click(); URL.revokeObjectURL(url);
-        }
-
-        function loadJSON(e) {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const parsed = JSON.parse(evt.target.result);
-                    if (Array.isArray(parsed)) {
-                        elements = parsed;
-                        let maxId = 0; elements.forEach(el => { 
-                            if(el.id > maxId) maxId = el.id; 
-                            if(!el.visualEvents) el.visualEvents = [];
-                            if(!el.eventMode) el.eventMode = 'visual';
-                            if(el.onClick === undefined) el.onClick = '';
-                        });
-                        elementIdCounter = maxId + 1; deletedElements = []; selectedId = null; updateUI();
-                    }
-                } catch(err) { alert("Błąd wczytywania pliku JSON! Upewnij się, że to poprawny plik projektu Bursztyn."); }
-            };
-            reader.readAsText(file); e.target.value = ''; 
-        }
-
-        function openVisualModal(id) {
-            activeVisualTargetId = id;
-            const el = elements.find(e => e.id === id);
-            document.getElementById('visual-modal-target-name').innerText = `Komponent: ${el.name} (${el.type})`;
-            tempVisualEvents = JSON.parse(JSON.stringify(el.visualEvents || []));
-            renderVisualWorkspace(); document.getElementById('visual-modal').classList.add('active');
-        }
-        function closeVisualModal() { document.getElementById('visual-modal').classList.remove('active'); activeVisualTargetId = null; }
-        
-        function saveVisualModal() {
-            const el = elements.find(e => e.id === activeVisualTargetId);
-            el.visualEvents = JSON.parse(JSON.stringify(tempVisualEvents));
-            syncVisualToCode(el); closeVisualModal(); updateUI();
-        }
-
-        window.addVisualEventModal = function(type) {
-            let newEv = { type, params: {} };
-            ACTION_TYPES[type].params.forEach(p => newEv.params[p.name] = p.default);
-            tempVisualEvents.push(newEv); renderVisualWorkspace();
-        }
-        window.updateTempVisualParam = function(evIndex, paramName, value) { tempVisualEvents[evIndex].params[paramName] = value; }
-        window.removeTempVisualEvent = function(evIndex) { tempVisualEvents.splice(evIndex, 1); renderVisualWorkspace(); }
-
-        function renderVisualWorkspace() {
-            let html = '';
-            tempVisualEvents.forEach((ev, idx) => {
-                const def = ACTION_TYPES[ev.type];
-                html += `<div class="bg-carbon-800 border border-carbon-700 rounded p-3 mb-2"><div class="flex justify-between items-center mb-2"><span class="text-sm font-bold text-bursztyn-400 flex items-center gap-2"><span class="text-xl">${def.icon}</span> ${def.name}</span><button onclick="removeTempVisualEvent(${idx})" class="bg-red-900/80 hover:bg-red-800 px-2 py-0.5 rounded text-xs text-white">Usuń</button></div><div class="flex flex-col gap-2">`;
-                def.params.forEach(p => {
-                    let val = ev.params[p.name] !== undefined ? ev.params[p.name] : p.default;
-                    html += `<div class="flex items-center gap-3"><label class="text-xs text-gray-400 w-32 text-right">${p.label}</label><input type="${p.type}" value="${val}" onchange="updateTempVisualParam(${idx}, '${p.name}', this.value)" class="flex-1 bg-carbon-950 border border-carbon-700 text-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-bursztyn-500 font-mono"></div>`;
-                });
-                html += `</div></div>`;
-            });
-            document.getElementById('visual-blocks-container').innerHTML = html || '<div class="text-gray-500">Brak akcji. Wybierz z panelu po lewej.</div>';
-        }
-
-        function openMonacoModal() {
-            document.getElementById('code-modal').classList.add('active');
-            let code = generateCPPCode();
-            if (!monacoInst) {
-                require(['vs/editor/editor.main'], function () {
-                    monacoInst = monaco.editor.create(document.getElementById('monaco-container'), {
-                        value: code, language: 'cpp', theme: 'vs-dark', automaticLayout: true, minimap: { enabled: false }, fontSize: 13
-                    });
-                });
-            } else { monacoInst.setValue(code); }
-        }
-        function closeMonacoModal() { document.getElementById('code-modal').classList.remove('active'); }
-
-        window.setEventMode = function(mode) {
-            if(!selectedId) return;
-            const el = elements.find(e => e.id === selectedId); el.eventMode = mode;
-            if(mode === 'visual') syncVisualToCode(el); updateUI();
-        }
-
-        // Escapuje tekst tak, by bezpiecznie trafil do literalu C++ ("...").
-        // Wczesniej teksty z cudzyslowami / backslashami / nowymi liniami
-        // (np. wielolinijkowy TMemo) łamały wygenerowany kod.
-        function escapeCppString(str) {
-            if (str === undefined || str === null) return '';
-            return String(str)
-                .replace(/\\/g, '\\\\')
-                .replace(/"/g, '\\"')
-                .replace(/\r\n/g, '\\n')
-                .replace(/\n/g, '\\n')
-                .replace(/\r/g, '\\n')
-                .replace(/\t/g, '\\t');
-        }
-
-        // Tworzy unikalny, poprawny identyfikator C++ z nazwy nadanej przez
-        // uzytkownika (usuwa polskie znaki/spacje/znaki specjalne, dokleja
-        // id elementu, zeby uniknac kolizji przy duplikatach nazw).
-        function cIdent(el) {
-            let base = (el.name || el.type || 'obj').toString();
-            const map = {'ą':'a','ć':'c','ę':'e','ł':'l','ń':'n','ó':'o','ś':'s','ź':'z','ż':'z',
-                         'Ą':'A','Ć':'C','Ę':'E','Ł':'L','Ń':'N','Ó':'O','Ś':'S','Ź':'Z','Ż':'Z'};
-            base = base.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, ch => map[ch] || ch);
-            base = base.replace(/[^a-zA-Z0-9_]/g, '_');
-            if (!/^[a-zA-Z_]/.test(base)) base = '_' + base;
-            return `${base}_${el.id}`;
-        }
-
-        function syncVisualToCode(el) {
-            let code = '';
-            el.visualEvents.forEach(ev => {
-                if(ev.type === 'print') code += `bws_wywolaj(1, (uint64_t)"${escapeCppString(ev.params.text)}\\n");\n`;
-                else if(ev.type === 'exec') code += `bws_wywolaj(10, (uint64_t)"${escapeCppString(ev.params.path)}");\n`;
-                else if(ev.type === 'sound') code += `bws_wywolaj(27, ${parseInt(ev.params.hz)||440}, ${parseInt(ev.params.ms)||200});\n`;
-                else if(ev.type === 'exit') code += `bws_wywolaj(32); while(1);\n`;
-                else if(ev.type === 'raw') code += `${ev.params.code}\n`;
-            });
-            el.onClick = code;
-        }
-
-        function renderProperties() {
-            if (!selectedId) { propertiesPanel.innerHTML = '<div class="text-gray-600 text-center mt-10 text-xs">Wybierz komponent z płótna.</div>'; return; }
-            const el = elements.find(e => e.id === selectedId); if (!el) return;
-
-            let html = `<div class="mb-3 border-b border-carbon-800 pb-2"><input type="text" value="${el.name}" onchange="updateElementProp(${selectedId}, 'name', this.value)" class="w-full bg-transparent text-bursztyn-400 font-bold text-sm focus:outline-none border-b border-transparent focus:border-bursztyn-500"><div class="text-[10px] text-gray-500 mt-1">Typ: ${el.type}</div></div>`;
-            html += `<div class="grid grid-cols-2 gap-2 mb-3">`;
-            html += createInputGroup('Poz X', 'x', el.x, 'number'); html += createInputGroup('Poz Y', 'y', el.y, 'number');
-            html += createInputGroup('Szer (W)', 'w', el.w, 'number'); html += createInputGroup('Wys (H)', 'h', el.h, 'number');
-            html += `</div>`; html += createInputGroup('Z-Order', 'z', el.z, 'number') + `<div class="mb-3"></div>`;
-
-            if (['TComboBox', 'TListBox', 'TCheckListBox', 'TRadioGroup', 'TMainMenu', 'TPopupMenu'].includes(el.type)) {
-                html += createInputGroup('Elementy listy/menu (po jednym w linii)', 'text', el.text, 'textarea') + `<div class="mb-3"></div>`;
-            } else if (el.text !== undefined) {
-                html += createInputGroup('Zawartość / Tekst', 'text', el.text, 'text') + `<div class="mb-3"></div>`;
-            }
-
-            if (el.bg !== undefined) html += createColorControl('KOLOR TŁA (BG)', 'bg', el.bg);
-            if (el.color !== undefined) html += createColorControl('KOLOR TEKSTU (FG)', 'color', el.color);
-
-            // Sekcja zdarzen dostepna teraz dla wszystkich komponentow
-            // interaktywnych, a nie tylko przyciskow.
-            if (EVENTOWALNE_TYPY.includes(el.type)) {
-                html += `<div class="mt-5 border-t border-carbon-800 pt-3"><div class="flex justify-between items-center mb-2"><h3 class="text-[10px] font-bold text-bursztyn-500 uppercase tracking-widest">⚡ Zdarzenia (Click / Interakcja)</h3></div>`;
-                if (el.eventMode === 'visual') {
-                    html += `<div class="bg-carbon-950 border border-carbon-700 rounded p-2 text-center mb-2 text-[10px] text-gray-400">Akcje blokowe: ${el.visualEvents.length}</div><button onclick="openVisualModal(${el.id})" class="w-full bg-bursztyn-600 hover:bg-bursztyn-500 text-white py-1.5 rounded text-xs font-bold transition-colors">🧩 Otwórz Edytor Wizualny</button>`;
-                } else {
-                    html += `<textarea onchange="updateElementProp(${selectedId}, 'onClick', this.value)" class="w-full bg-carbon-950 border border-carbon-700 text-gray-300 rounded p-2 text-[10px] h-24 font-mono custom-scrollbar">${el.onClick || ''}</textarea>`;
-                }
-                html += `<div class="flex gap-2 mt-2"><button onclick="setEventMode('visual')" class="flex-1 text-[9px] py-1 bg-carbon-800 text-white rounded">Visual</button><button onclick="setEventMode('code')" class="flex-1 text-[9px] py-1 bg-carbon-800 text-white rounded">C++</button></div>`;
-                if (el.type === 'TComboBox') {
-                    html += `<div class="text-[9px] text-gray-500 mt-2 italic">Rozwijanie listy i wybór pozycji są generowane automatycznie — powyższy kod uruchomi się dodatkowo po zmianie wyboru.</div>`;
-                } else if (el.type === 'TCheckBox' || el.type === 'TRadioButton') {
-                    html += `<div class="text-[9px] text-gray-500 mt-2 italic">Przełączanie zaznaczenia jest generowane automatycznie — powyższy kod uruchomi się dodatkowo po kliknięciu.</div>`;
-                }
-                html += `</div>`;
-            }
-            propertiesPanel.innerHTML = html;
-        }
-
-        function createInputGroup(label, prop, value, type) {
-            let extra = type === 'textarea' ? `<textarea onchange="updateElementProp(${selectedId}, '${prop}', this.value)" class="w-full bg-carbon-800 border border-carbon-700 text-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-bursztyn-500 h-24 font-mono custom-scrollbar" placeholder="Element 1\nElement 2...">${value || ''}</textarea>` : `<input type="${type}" value="${value}" onchange="updateElementProp(${selectedId}, '${prop}', this.value)" class="w-full bg-carbon-800 border border-carbon-700 text-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-bursztyn-500">`;
-            return `<div><label class="block text-gray-400 text-[10px] mb-0.5 font-bold tracking-wide">${label}</label>${extra}</div>`;
-        }
-
-        function createColorControl(label, prop, bHexValue) {
-            let { a, hex } = parseBursztynColor(bHexValue);
-            return `<div class="mb-3 bg-carbon-900 p-2 rounded border border-carbon-800"><label class="block text-gray-400 text-[10px] mb-1 font-bold tracking-widest">${label}</label><div class="flex items-center gap-2"><div class="w-6 h-6 rounded border border-gray-600 shadow-sm relative overflow-hidden" style="background-color: ${bursztynToRGBA(bHexValue)};"><input type="color" value="${hex}" oninput="updateColor('${prop}', this.value, 255)" class="absolute inset-0 w-[200%] h-[200%] top-[-50%] left-[-50%] opacity-0 cursor-pointer"></div><input type="text" value="${hex.toUpperCase()}" class="flex-1 w-full bg-carbon-800 border border-carbon-700 text-gray-200 rounded px-2 py-1 text-xs font-mono" readonly></div></div>`;
-        }
-
-        function isNonVisual(type) { for(let cat in COMPONENT_DB) { let found = COMPONENT_DB[cat].find(c => c.type === type); if(found && found.n) return true; } return false; }
-        function getIconFor(type) { for(let cat in COMPONENT_DB) { let found = COMPONENT_DB[cat].find(c => c.type === type); if(found) return found.icon; } return '🧩'; }
-
-        function renderCanvas() {
-            canvas.innerHTML = '';
-            const sortedElements = [...elements].sort((a, b) => {
-                if (a.type === 'window' && b.type !== 'window') return -1;
-                if (b.type === 'window' && a.type !== 'window') return 1;
-                return a.z - b.z;
-            });
-
-            sortedElements.forEach(el => {
-                const node = document.createElement('div');
-                let isWindow = (el.type === 'window');
-                
-                node.className = `element-node ${selectedId === el.id ? 'selected' : ''} ${isWindow ? 'window-node' : ''}`;
-                node.style.left = `${el.x}px`; node.style.top = `${el.y}px`;
-                node.style.width = `${el.w}px`; node.style.height = `${el.h}px`;
-                node.style.zIndex = isWindow ? 0 : (el.z + 10);
-                
-                let isNV = isNonVisual(el.type);
-
-                if (isNV) {
-                    node.style.backgroundColor = 'rgba(28,28,28,0.8)'; node.style.border = '1px dashed #E58A00'; node.style.borderRadius = '4px';
-                    node.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center"><span class="text-lg">${getIconFor(el.type)}</span><span class="text-[8px] truncate w-full text-center text-gray-300">${el.name}</span></div>`;
-                }
-                else if (isWindow) {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.border = `2px solid ${bursztynToRGBA(OS_COLORS.AmberMid)}`;
-                    node.innerHTML = `<div style="background-color: ${bursztynToRGBA(OS_COLORS.AmberMid)}; height: 24px; color: #FFF; font-size: 11px; font-weight: bold; padding: 0 8px; display:flex; align-items:center; justify-content:space-between;"><span>${el.text}</span><div style="display:flex; gap: 4px;"><div style="width:14px;height:14px;background:#E58A00;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#000;font-size:10px">-</div><div style="width:14px;height:14px;background:#AA0000;border-radius:2px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:10px">x</div></div></div>`;
-                } 
-                else if (el.type === 'TPanel' || el.type.includes('Grid')) {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.border = `1px solid ${bursztynToRGBA(el.color)}`;
-                    if(el.type.includes('Grid')) {
-                        node.style.backgroundImage = 'linear-gradient(to right, #444 1px, transparent 1px), linear-gradient(to bottom, #444 1px, transparent 1px)';
-                        node.style.backgroundSize = '40px 20px';
-                    }
-                } 
-                else if (el.type === 'TGroupBox' || el.type === 'TRadioGroup') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.border = `1px solid #777`; node.style.borderRadius = '2px';
-                    node.innerHTML = `<div style="position:absolute; top:-8px; left:8px; background:${bursztynToRGBA(OS_COLORS.CarbonBg)}; padding:0 4px; font-size:10px; color:#A0A0A0;">${el.text}</div>`;
-                    if(el.type === 'TRadioGroup') {
-                        let items = (el.text||"Opcja").split('\n').slice(1).map(item => `<div style="display:flex;align-items:center;gap:4px;margin:2px 0;"><div style="width:10px;height:10px;border-radius:50%;border:1px solid #777;"></div><span style="font-size:9px">${item}</span></div>`).join('');
-                        node.innerHTML += `<div style="padding:10px;">${items}</div>`;
-                    }
-                }
-                else if (el.type === 'TButton' || el.type === 'TBitBtn') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.color = bursztynToRGBA(el.color); node.style.border = `1px solid #777`;
-                    node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.justifyContent = 'center'; node.style.fontSize = '12px'; node.innerText = el.text;
-                } 
-                else if (el.type === 'TLabel' || el.type === 'TStaticText') {
-                    node.style.color = bursztynToRGBA(el.color); node.style.fontSize = `${12 * (el.scale||1)}px`; node.innerText = el.text; node.style.whiteSpace = 'nowrap';
-                } 
-                else if (el.type === 'TListBox' || el.type === 'TCheckListBox') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.color = bursztynToRGBA(el.color); node.style.border = '1px solid #777'; node.style.fontSize = '11px'; node.style.overflow = 'hidden';
-                    let isCheck = el.type === 'TCheckListBox';
-                    let items = (el.text||"").split('\n').map((item, idx) => `<div style="padding: 2px 4px; display:flex; align-items:center; gap:4px; ${idx===0 ? 'background:#0078D7; color:white;' : ''}">${isCheck ? '<div style="width:10px;height:10px;border:1px solid #555;background:white;"></div>' : ''}${item}</div>`).join(''); 
-                    node.innerHTML = items;
-                } 
-                else if (el.type === 'TComboBox') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.color = bursztynToRGBA(el.color); node.style.border = '1px solid #777';
-                    node.style.fontSize = '11px'; node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.justifyContent = 'space-between';
-                    let firstItem = (el.text||"").split('\n')[0] || "";
-                    node.innerHTML = `<span style="padding-left:4px; overflow:hidden; white-space:nowrap;">${firstItem}</span><div style="background:#E0E0E0; border-left:1px solid #777; padding:0 4px; height:100%; display:flex; align-items:center; color:#333;">▼</div>`;
-                } 
-                else if (el.type === 'TMainMenu') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.color = bursztynToRGBA(el.color); node.style.borderBottom = '1px solid #404040';
-                    node.style.fontSize = '12px'; node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.paddingLeft = '8px'; node.style.gap = '15px';
-                    let items = (el.text||"").split('\n').filter(i => i.trim() !== '').map(item => `<span>${item}</span>`).join('');
-                    node.innerHTML = items || '<span style="color:#777">Puste Menu</span>';
-                }
-                else if (el.type === 'TMemo' || el.type === 'TEdit') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.color = bursztynToRGBA(el.color); node.style.border = '1px solid #777';
-                    node.style.fontSize = '11px'; node.style.padding = '4px'; node.style.overflow = 'hidden'; node.style.whiteSpace = el.type === 'TMemo' ? 'pre-wrap' : 'nowrap'; node.innerText = el.text;
-                } 
-                else if (el.type === 'TCheckBox') {
-                    node.style.color = bursztynToRGBA(el.color); node.style.fontSize = '11px'; node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.gap = '4px';
-                    node.innerHTML = `<div style="width:13px; height:13px; border:1px solid #777; background:#FFF; display:flex; align-items:center; justify-content:center; color:#000; font-size:10px; font-weight:bold;">✓</div><span>${el.text}</span>`;
-                } 
-                else if (el.type === 'TRadioButton') {
-                    node.style.color = bursztynToRGBA(el.color); node.style.fontSize = '11px'; node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.gap = '4px';
-                    node.innerHTML = `<div style="width:13px; height:13px; border:1px solid #777; background:#FFF; border-radius:50%; display:flex; align-items:center; justify-content:center;"><div style="width:5px; height:5px; background:#000; border-radius:50%;"></div></div><span>${el.text}</span>`;
-                } 
-                else if (el.type === 'TProgressBar') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.border = '1px solid #777';
-                    node.innerHTML = `<div style="width:${el.value||50}%; height:100%; background:${bursztynToRGBA(el.color)};"></div>`;
-                }
-                else if (el.type === 'TStatusBar') {
-                    node.style.backgroundColor = bursztynToRGBA(el.bg); node.style.color = bursztynToRGBA(el.color); node.style.border = '1px solid #777';
-                    node.style.fontSize = '10px'; node.style.display = 'flex'; node.style.alignItems = 'center'; node.style.padding = '0 4px';
-                    node.innerText = el.text;
-                }
-                else if (el.type === 'TScrollBar') {
-                    node.style.backgroundColor = '#E0E0E0'; node.style.border = '1px solid #777'; node.style.display = 'flex'; node.style.flexDirection = 'column'; node.style.justifyContent = 'space-between';
-                    node.innerHTML = `<div style="background:#CCC; border-bottom:1px solid #777; text-align:center; font-size:8px; color:black;">▲</div><div style="background:#CCC; border-top:1px solid #777; text-align:center; font-size:8px; color:black;">▼</div>`;
-                }
-                else {
-                    node.style.backgroundColor = 'rgba(255,255,255,0.1)'; node.style.border = '1px solid #777';
-                    node.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center text-[10px] text-gray-400 p-1 text-center overflow-hidden"><span class="text-sm">${getIconFor(el.type)}</span>${el.name}</div>`;
-                }
-
-                if (selectedId === el.id) {
-                    const dirs = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
-                    dirs.forEach(dir => {
-                        let handle = document.createElement('div'); handle.className = `resize-handle resize-${dir}`;
-                        handle.onmousedown = (e) => startResize(e, dir, el.id); node.appendChild(handle);
-                    });
-                }
-                node.onmousedown = (e) => startDrag(e, el.id);
-                node.oncontextmenu = (e) => showContextMenu(e, el.id);
-                canvas.appendChild(node);
-            });
-        }
-
-        function renderTree() {
-            treePanel.innerHTML = '';
-            const sortedElements = [...elements].sort((a, b) => b.z - a.z);
-            sortedElements.forEach(el => {
-                const btn = document.createElement('div');
-                btn.className = `tree-item px-2 py-1.5 rounded transition-colors flex items-center gap-2 ${selectedId === el.id ? 'bg-bursztyn-600 text-white font-bold' : 'text-gray-400 hover:bg-carbon-800 hover:text-gray-200'}`;
-                btn.innerHTML = `<span>${getIconFor(el.type)}</span> <span class="truncate">${el.name}</span>`;
-                btn.onclick = () => selectElement(el.id);
-                treePanel.appendChild(btn);
-            });
-        }
-
-        function updateUI() { renderCanvas(); renderProperties(); renderTree(); }
-        
-        function startDrag(e, id) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.classList.contains('resize-handle')) return;
-            if (e.button !== 0) return; 
-            e.preventDefault(); e.stopPropagation(); selectElement(id);
-            isDragging = true; dragTarget = elements.find(el => el.id === id);
-            startX = e.clientX; startY = e.clientY;
-            elements.forEach(el => { el.initialStartX = el.x; el.initialStartY = el.y; });
-        }
-        function startResize(e, dir, id) {
-            e.preventDefault(); e.stopPropagation(); selectElement(id);
-            isResizing = true; resizeDir = dir; dragTarget = elements.find(el => el.id === id);
-            startX = e.clientX; startY = e.clientY;
-            initialW = dragTarget.w; initialH = dragTarget.h; initialX = dragTarget.x; initialY = dragTarget.y;
-        }
-
-        function onGlobalMove(e) {
-            if (isDragging && dragTarget) {
-                let dx = Math.round((e.clientX - startX) / 10) * 10;
-                let dy = Math.round((e.clientY - startY) / 10) * 10;
-                dragTarget.x = dragTarget.initialStartX + dx; dragTarget.y = dragTarget.initialStartY + dy;
-                if (dragTarget.type === 'window') {
-                    elements.forEach(el => { if (el.id !== dragTarget.id) { el.x = el.initialStartX + dx; el.y = el.initialStartY + dy; } });
-                }
-                renderCanvas(); renderProperties();
-            } 
-            else if (isResizing && dragTarget) {
-                let dx = Math.round((e.clientX - startX) / 5) * 5; let dy = Math.round((e.clientY - startY) / 5) * 5;
-                if(resizeDir.includes('e')) dragTarget.w = Math.max(10, initialW + dx);
-                if(resizeDir.includes('s')) dragTarget.h = Math.max(10, initialH + dy);
-                if(resizeDir.includes('w')) { let aDx = Math.min(dx, initialW - 10); dragTarget.x = initialX + aDx; dragTarget.w = initialW - aDx; }
-                if(resizeDir.includes('n')) { let aDy = Math.min(dy, initialH - 10); dragTarget.y = initialY + aDy; dragTarget.h = initialH - aDy; }
-                renderCanvas(); renderProperties();
-            }
-        }
-        function onGlobalUp() { if (isDragging || isResizing) { isDragging = false; isResizing = false; dragTarget = null; updateUI(); } }
-        canvas.onmousedown = (e) => { if (e.target === canvas && e.button === 0) { selectedId = null; updateUI(); } };
-
-        function showContextMenu(e, id) {
-            e.preventDefault(); e.stopPropagation();
-            if(id !== null) selectElement(id);
-            ctxMenu.style.left = e.clientX + 'px'; ctxMenu.style.top = e.clientY + 'px'; ctxMenu.classList.remove('hidden');
-            let html = '';
-            if (id !== null) { html += `<div onclick="deleteSelected(); document.getElementById('context-menu').classList.add('hidden');" class="ctx-item text-red-400 hover:bg-red-900/30 flex justify-between"><span>🗑️ Usuń obiekt</span> <span class="text-[10px] text-gray-500">Del</span></div>`; }
-            if(html === '') html = '<div class="ctx-item text-gray-500">Brak akcji</div>';
-            ctxMenu.innerHTML = html;
-        }
-
-        function generateCPPCode() {
-            let windowEl = elements.find(e => e.type === 'window');
-            let cppCode = `/*
- * Aplikacja Bursztyn OS (Zgodna z C++17, bursztyn_gui.h i ABI Linkera)
- * Wygenerowana przez: Bursztyn Builder RAD v2.9
- */
-#include "bursztyn_gui.h"
-#include <stddef.h>
-#include <stdint.h>
-
-// -----------------------------------------------------------------------------
-// Format .bur (Naglowek wymagany przez Loadera)
-// -----------------------------------------------------------------------------
-
-struct NaglowekBur {
-    uint8_t  magia[4];
-    uint64_t punkt_wejscia;
-    uint64_t tekst_przesuniecie;
-    uint64_t tekst_rozmiar;
-    uint64_t tekst_wirtualny;
-    uint64_t dane_przesuniecie;
-    uint64_t dane_rozmiar;
-    uint64_t dane_wirtualny;
-} __attribute__((packed));
-
-extern "C" __attribute__((noreturn)) void _start();
-
-#ifndef BUR_TEKST_ROZMIAR
-#define BUR_TEKST_ROZMIAR 32768ULL
-#endif
-
-static constexpr uint64_t BUR_TEKST_PRZESUNIECIE = 4096ULL;
-static constexpr uint64_t BUR_TEKST_WIRTUALNY      = 0x601000ULL;
-static constexpr uint64_t BUR_DANE_PRZESUNIECIE   = BUR_TEKST_PRZESUNIECIE + BUR_TEKST_ROZMIAR;
-static constexpr uint64_t BUR_DANE_WIRTUALNY       = BUR_TEKST_WIRTUALNY + BUR_TEKST_ROZMIAR;
-static constexpr uint64_t BUR_DANE_ROZMIAR         = 131072ULL;
-
-extern "C" {
-    __attribute__((section(".naglowek"), used))
-    struct NaglowekBur naglowek = {
-        {'B', 'U', 'R', '\\0'},
-        (uint64_t)&_start,
-        BUR_TEKST_PRZESUNIECIE, BUR_TEKST_ROZMIAR, BUR_TEKST_WIRTUALNY,
-        BUR_DANE_PRZESUNIECIE, BUR_DANE_ROZMIAR, BUR_DANE_WIRTUALNY
-    };
-}
-
-// -----------------------------------------------------------------------------
-// Zmienne preprocesora dla pętli GUI
-// -----------------------------------------------------------------------------
-static int WIN_X = ${windowEl ? windowEl.x : 100};
-static int WIN_Y = ${windowEl ? windowEl.y : 100};
-static int WIN_W = ${windowEl ? windowEl.w : 600};
-static int WIN_H = ${windowEl ? windowEl.h : 450};
-static bool zmaksymalizowane = false;
-static bool aplikacja_zminimalizowana = false;
-static bool dragging = false;
-static int drag_off_x = 0;
-static int drag_off_y = 0;
-static int screen_w = 1024, screen_h = 768;
-static int restore_x = 0, restore_y = 0, restore_w = 0, restore_h = 0;
-
-`;
-
-            // ---------------------------------------------------------------
-            // Stan per-instancja dla kontrolek interaktywnych (combo/checkbox/
-            // radio/listbox). Wczesniej takie kontrolki byly czysto statyczne.
-            // ---------------------------------------------------------------
-            const sortedElements0 = [...elements].sort((a,b)=>a.z - b.z);
-            sortedElements0.forEach(el => {
-                if (el.type === 'window' || isNonVisual(el.type)) return;
-                const id = cIdent(el);
-                if (el.type === 'TComboBox') {
-                    cppCode += `static bool combo_otwarty_${id} = false;\n`;
-                    cppCode += `static int  combo_wybor_${id} = 0;\n`;
-                } else if (el.type === 'TCheckBox' || el.type === 'TCheckListBox') {
-                    cppCode += `static bool zaznaczone_${id} = false;\n`;
-                } else if (el.type === 'TRadioButton') {
-                    cppCode += `static bool wybrane_${id} = false;\n`;
-                } else if (el.type === 'TListBox') {
-                    cppCode += `static int  wybor_${id} = 0;\n`;
-                }
-            });
-            cppCode += `\n`;
-
-            cppCode += `static bool punkt_w_prostokacie(int px, int py, int x, int y, int w, int h) {
-    if (w <= 0 || h <= 0) return false;
-    return px >= x && px < x + w && py >= y && py < y + h;
-}
-
-static void ogranicz_pozycje_okna(int* x, int* y) {
-    if (!x || !y) return;
-    int max_x = screen_w - WIN_W;
-    int max_y = screen_h - 40 - WIN_H;
-    if (max_x < 0) max_x = 0;
-    if (max_y < 0) max_y = 0;
-    if (*x < 0) *x = 0;
-    if (*y < 0) *y = 0;
-    if (*x > max_x) *x = max_x;
-    if (*y > max_y) *y = max_y;
-}
-
-static void RysujInterfejs(bool wyczysc_warstwe) {
-    if (wyczysc_warstwe) gui_odswiez_pulpit();
-    if (aplikacja_zminimalizowana) return;
-
-`;
-            if (windowEl) {
-                cppCode += `    // Tlo Okna i Belka Systemowa\n`;
-                cppCode += `    gui_rysuj_okno(WIN_X, WIN_Y, WIN_W, WIN_H, "${escapeCppString(windowEl.text)}");\n`;
-                cppCode += `    gui_rysuj_standardowa_belke(WIN_X, WIN_Y, WIN_W, "${escapeCppString(windowEl.text)}", zmaksymalizowane);\n\n`;
-            }
-
-            const sortedElements = [...elements].sort((a,b)=>a.z - b.z);
-            sortedElements.forEach(el => {
-                if(el.type === 'window' || isNonVisual(el.type)) return;
-                let relX = windowEl ? el.x - windowEl.x : el.x;
-                let relY = windowEl ? el.y - windowEl.y : el.y;
-                const id = cIdent(el);
-                const txt = escapeCppString(el.text);
-                const firstLine = escapeCppString((el.text||"").split('\n')[0] || "");
-                const items = (el.text||"").split('\n').filter(i => i.trim() !== '');
-
-                cppCode += `    // ${el.name} (${el.type})\n`;
-
-                if (el.type === 'TButton' || el.type === 'TBitBtn') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, 1, 0x00404040);\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY} + ${el.h} - 1, ${el.w}, 1, 0x00101010);\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, 1, ${el.h}, 0x00404040);\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX} + ${el.w} - 1, WIN_Y + ${relY}, 1, ${el.h}, 0x00101010);\n`;
-                    cppCode += `    rysuj_tekst_wysrodkowany(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, 1, ${el.color}, "${txt}");\n`;
-                }
-                else if (el.type === 'TLabel') {
-                    cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.color}, ${el.scale||1}, "${txt}");\n`;
-                }
-                else if (el.type === 'TPanel' || (el.type.includes('Grid') && el.type !== 'TCheckListBox')) {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, 1, 0x00404040);\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, 1, ${el.h}, 0x00404040);\n`;
-                }
-                else if (el.type === 'TGroupBox' || el.type === 'TRadioGroup') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, 1, 0x00404040);\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, 1, ${el.h}, 0x00404040);\n`;
-                    if (firstLine) cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 6, WIN_Y + ${relY} - 6, 0x00A0A0A0, 1, "${firstLine}");\n`;
-                    if (el.type === 'TRadioGroup') {
-                        let opts = items.slice(1);
-                        opts.forEach((opt, i) => {
-                            let oy = relY + 20 + i * 18;
-                            cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX + 10}, WIN_Y + ${oy}, 10, 10, 0x00FFFFFF);\n`;
-                            cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX + 26}, WIN_Y + ${oy - 2}, ${el.color}, 1, "${escapeCppString(opt)}");\n`;
-                        });
-                    }
-                }
-                else if (el.type === 'TEdit' || el.type === 'TLabeledEdit' || el.type === 'TMaskEdit') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 4, WIN_Y + ${relY} + 4, ${el.color}, 1, "${firstLine}");\n`;
-                }
-                else if (el.type === 'TMemo' || el.type === 'TRichEdit') {
-                    // Poprawka: TMemo trafialo wczesniej w galaz "else" i renderowalo
-                    // sie tylko jako szary placeholder z nazwa typu. Teraz kazda
-                    // linia tekstu jest rysowana osobno.
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    const lines = (el.text||"").split('\n');
-                    lines.forEach((ln, i) => {
-                        const ly = relY + 4 + i * 14;
-                        cppCode += `    if (${ly} < ${relY + el.h - 12}) gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 4, WIN_Y + ${ly}, ${el.color}, 1, "${escapeCppString(ln)}");\n`;
-                    });
-                }
-                else if (el.type === 'TListBox' || el.type === 'TCheckListBox') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    items.forEach((it, i) => {
-                        const iy = relY + i * 16;
-                        cppCode += `    if (${iy} < ${relY + el.h - 14}) {\n`;
-                        if (el.type === 'TListBox') {
-                            cppCode += `        if (wybor_${id} == ${i}) gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${iy}, ${el.w}, 16, 0x000078D7);\n`;
-                            cppCode += `        gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 4, WIN_Y + ${iy} + 2, wybor_${id} == ${i} ? 0x00FFFFFF : ${el.color}, 1, "${escapeCppString(it)}");\n`;
-                        } else {
-                            cppCode += `        gui_rysuj_prostokat(WIN_X + ${relX} + 4, WIN_Y + ${iy} + 3, 10, 10, zaznaczone_${id} ? 0x0000AA00 : 0x00FFFFFF);\n`;
-                            cppCode += `        gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 20, WIN_Y + ${iy} + 2, ${el.color}, 1, "${escapeCppString(it)}");\n`;
-                        }
-                        cppCode += `    }\n`;
-                    });
-                }
-                else if (el.type === 'TComboBox' || el.type === 'TDBComboBox') {
-                    // Poprawka: combobox mial tylko statyczny wyglad. Teraz stan
-                    // otwarcia rysuje faktyczna liste ponizej kontrolki.
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, 1, 0x00404040);\n`;
-                    cppCode += `    { const char* combo_items_${id}[] = { `;
-                    cppCode += items.map(it => `"${escapeCppString(it)}"`).join(', ') || `""`;
-                    cppCode += ` };\n`;
-                    cppCode += `      const int combo_n_${id} = ${Math.max(items.length,1)};\n`;
-                    cppCode += `      const char* combo_aktualny_${id} = (combo_wybor_${id} >= 0 && combo_wybor_${id} < combo_n_${id}) ? combo_items_${id}[combo_wybor_${id}] : "";\n`;
-                    cppCode += `      gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 4, WIN_Y + ${relY} + 4, ${el.color}, 1, combo_aktualny_${id});\n`;
-                    cppCode += `      gui_rysuj_prostokat(WIN_X + ${relX + el.w - 18}, WIN_Y + ${relY}, 18, ${el.h}, 0x00E0E0E0);\n`;
-                    cppCode += `      gui_wypisz_tekst_kolor_skala(WIN_X + ${relX + el.w - 14}, WIN_Y + ${relY + 4}, 0x00303030, 1, combo_otwarty_${id} ? "^" : "v");\n`;
-                    cppCode += `      if (combo_otwarty_${id}) {\n`;
-                    cppCode += `          const int lista_h_${id} = combo_n_${id} * 16;\n`;
-                    cppCode += `          gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY} + ${el.h}, ${el.w}, lista_h_${id}, 0x00FFFFFF);\n`;
-                    cppCode += `          gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY} + ${el.h}, ${el.w}, 1, 0x00404040);\n`;
-                    cppCode += `          for (int i_${id} = 0; i_${id} < combo_n_${id}; ++i_${id}) {\n`;
-                    cppCode += `              int iy_${id} = WIN_Y + ${relY} + ${el.h} + i_${id} * 16;\n`;
-                    cppCode += `              if (i_${id} == combo_wybor_${id}) gui_rysuj_prostokat(WIN_X + ${relX}, iy_${id}, ${el.w}, 16, 0x000078D7);\n`;
-                    cppCode += `              gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 4, iy_${id} + 2, i_${id} == combo_wybor_${id} ? 0x00FFFFFF : 0x00000000, 1, combo_items_${id}[i_${id}]);\n`;
-                    cppCode += `          }\n`;
-                    cppCode += `      }\n`;
-                    cppCode += `    }\n`;
-                }
-                else if (el.type === 'TCheckBox' || el.type === 'TDBCheckBox') {
-                    // Poprawka: dodano rzeczywisty stan zaznaczenia (per instancja).
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, 13, 13, 0x00FFFFFF);\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, 13, 1, 0x00404040);\n`;
-                    cppCode += `    if (zaznaczone_${id}) gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 1, WIN_Y + ${relY}, 0x00008A00, 1, "X");\n`;
-                    cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 18, WIN_Y + ${relY} + 1, ${el.color}, 1, "${txt}");\n`;
-                }
-                else if (el.type === 'TRadioButton') {
-                    // Poprawka: dodano rzeczywisty stan wyboru (per instancja).
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, 13, 13, 0x00FFFFFF);\n`;
-                    cppCode += `    if (wybrane_${id}) gui_rysuj_prostokat(WIN_X + ${relX + 4}, WIN_Y + ${relY + 4}, 5, 5, 0x00000000);\n`;
-                    cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 18, WIN_Y + ${relY} + 1, ${el.color}, 1, "${txt}");\n`;
-                }
-                else if (el.type === 'TProgressBar') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, (${el.w} * ${el.value||50}) / 100, ${el.h}, ${el.color});\n`;
-                }
-                else if (el.type === 'TStatusBar') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + 4, WIN_Y + ${relY} + 2, ${el.color}, 1, "${txt}");\n`;
-                }
-                else if (el.type === 'TMainMenu') {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, ${el.bg});\n`;
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY} + ${el.h} - 1, ${el.w}, 1, 0x00404040);\n`;
-                    let currentX = 10;
-                    items.forEach(item => {
-                        cppCode += `    gui_wypisz_tekst_kolor_skala(WIN_X + ${relX} + ${currentX}, WIN_Y + ${relY} + 4, ${el.color}, 1, "${escapeCppString(item)}");\n`;
-                        currentX += item.length * 8 + 15;
-                    });
-                }
-                else {
-                    cppCode += `    gui_rysuj_prostokat(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, 0x00444444);\n`;
-                    cppCode += `    rysuj_tekst_wysrodkowany(WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h}, 1, 0x00FFFFFF, "${el.type}");\n`;
-                }
-            });
-
-            cppCode += `\n    gui_odswiez();\n}\n\n`;
-
-            cppCode += `extern "C" __attribute__((noreturn)) void _start() {\n`;
-            cppCode += `    gui_pobierz_rozdzielczosc(&screen_w, &screen_h);\n`;
-            cppCode += `    if (screen_w <= 0 || screen_h <= 0) gui_zakoncz_aplikacje();\n`;
-            cppCode += `    ogranicz_pozycje_okna(&WIN_X, &WIN_Y);\n`;
-            cppCode += `    if (bws_utworz_warstwe(WIN_X, WIN_Y, WIN_W, WIN_H, 10) < 0) gui_zakoncz_aplikacje();\n`;
-            cppCode += `    gui_ustaw_przejecie_myszy(true);\n`;
-            cppCode += `    bool wyjdz = false;\n`;
-            cppCode += `    RysujInterfejs(true);\n\n`;
-            cppCode += `    while (!wyjdz) {\n`;
-            cppCode += `        bws_zdarzenie zdarzenie{};\n`;
-            cppCode += `        if (!gui_czekaj_na_zdarzenie(&zdarzenie)) continue;\n`;
-            cppCode += `        if (zdarzenie.typ == BWS_ZDARZENIE_FOCUS && aplikacja_zminimalizowana) aplikacja_zminimalizowana = false;\n`;
-            cppCode += `        const int mx = zdarzenie.x; const int my = zdarzenie.y;\n`;
-            cppCode += `        const bool lewy = (zdarzenie.przyciski & 0x01U) != 0;\n`;
-            cppCode += `        const bool klik_lewy = zdarzenie.typ == BWS_ZDARZENIE_MYSZ_DOWN;\n`;
-            cppCode += `        const bool puszczenie_lewego = zdarzenie.typ == BWS_ZDARZENIE_MYSZ_UP;\n`;
-            cppCode += `        bool redraw = false; bool pelne_czyszczenie = false;\n\n`;
-            cppCode += `        if (aplikacja_zminimalizowana) continue;\n\n`;
-
-            // Poprawka: zamykanie otwartego comboboxa przy kliknieciu gdziekolwiek
-            // indziej (tak, by rozwiniete listy nie zostawaly "zawieszone" na ekranie).
-            const combos = sortedElements.filter(e => e.type === 'TComboBox' || e.type === 'TDBComboBox');
-            if (combos.length > 0) {
-                cppCode += `        // Klikniecie w pozycje rozwinietej listy ComboBox (obsluga PRZED reszta trafien,\n`;
-                cppCode += `        // bo lista rysuje sie NAD innymi kontrolkami).\n`;
-                cppCode += `        bool combo_klik_obsluzony = false;\n`;
-                cppCode += `        if (klik_lewy) {\n`;
-                combos.forEach(el => {
-                    const id = cIdent(el);
-                    const items = (el.text||"").split('\n').filter(i => i.trim() !== '');
-                    let relX = windowEl ? el.x - windowEl.x : el.x;
-                    let relY = windowEl ? el.y - windowEl.y : el.y;
-                    cppCode += `            if (combo_otwarty_${id}) {\n`;
-                    cppCode += `                const int n_${id} = ${Math.max(items.length,1)};\n`;
-                    cppCode += `                if (punkt_w_prostokacie(mx, my, WIN_X + ${relX}, WIN_Y + ${relY} + ${el.h}, ${el.w}, n_${id} * 16)) {\n`;
-                    cppCode += `                    int wybrany_${id} = (my - (WIN_Y + ${relY} + ${el.h})) / 16;\n`;
-                    cppCode += `                    if (wybrany_${id} >= 0 && wybrany_${id} < n_${id}) combo_wybor_${id} = wybrany_${id};\n`;
-                    cppCode += `                    combo_otwarty_${id} = false; redraw = true; pelne_czyszczenie = true; combo_klik_obsluzony = true;\n`;
-                    if (el.onClick && el.onClick.trim() !== '') {
-                        cppCode += `                    // zdarzenie uzytkownika po zmianie wyboru\n`;
-                        el.onClick.split('\n').forEach(l => { if (l.trim() !== '') cppCode += `                    ${l}\n`; });
-                    }
-                    cppCode += `                } else if (punkt_w_prostokacie(mx, my, WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h})) {\n`;
-                    cppCode += `                    combo_otwarty_${id} = false; redraw = true; pelne_czyszczenie = true; combo_klik_obsluzony = true;\n`;
-                    cppCode += `                } else {\n`;
-                    cppCode += `                    combo_otwarty_${id} = false; redraw = true; pelne_czyszczenie = true;\n`;
-                    cppCode += `                }\n`;
-                    cppCode += `            }\n`;
-                });
-                cppCode += `        }\n\n`;
-            } else {
-                cppCode += `        bool combo_klik_obsluzony = false;\n\n`;
-            }
-
-            cppCode += `        if (!combo_klik_obsluzony && klik_lewy && punkt_w_prostokacie(mx, my, WIN_X, WIN_Y, WIN_W, WIN_H)) {\n`;
-
-            if (windowEl) {
-                cppCode += `            const gui_akcja_belki akcja = gui_hit_test_belki(mx, my, WIN_X, WIN_Y, WIN_W);\n`;
-                cppCode += `            if (akcja == GUI_BELKA_MINIMALIZUJ) {\n`;
-                cppCode += `                aplikacja_zminimalizowana = gui_minimalizuj_okno();\n`;
-                cppCode += `                dragging = false; gui_ustaw_capture_myszy(false);\n`;
-                cppCode += `            } else if (akcja == GUI_BELKA_ZAMKNIJ) {\n`;
-                cppCode += `                wyjdz = true; dragging = false;\n`;
-                cppCode += `            } else if (akcja == GUI_BELKA_MAKSYMALIZUJ) {\n`;
-                cppCode += `                if (!zmaksymalizowane) {\n`;
-                cppCode += `                    restore_x = WIN_X; restore_y = WIN_Y; restore_w = WIN_W; restore_h = WIN_H;\n`;
-                cppCode += `                    WIN_X = 0; WIN_Y = 0; WIN_W = screen_w; WIN_H = screen_h - 40;\n`;
-                cppCode += `                    zmaksymalizowane = true;\n`;
-                cppCode += `                } else {\n`;
-                cppCode += `                    WIN_X = restore_x; WIN_Y = restore_y; WIN_W = restore_w; WIN_H = restore_h;\n`;
-                cppCode += `                    zmaksymalizowane = false;\n`;
-                cppCode += `                }\n`;
-                cppCode += `                if (bws_utworz_warstwe(WIN_X, WIN_Y, WIN_W, WIN_H, 10) < 0) gui_zakoncz_aplikacje();\n`;
-                cppCode += `                redraw = true; pelne_czyszczenie = true;\n`;
-                cppCode += `            } else if (akcja == GUI_BELKA_DRAG && !zmaksymalizowane) {\n`;
-                cppCode += `                dragging = true; gui_ustaw_capture_myszy(true);\n`;
-                cppCode += `                drag_off_x = mx - WIN_X; drag_off_y = my - WIN_Y;\n`;
-                cppCode += `            } else {\n`;
-            }
-
-            // Poprawka: hit-test przechodzi teraz od najwyzszego elementu (najwyzszy
-            // z-order) do najnizszego i PRZERYWA po pierwszym trafieniu, zeby
-            // klikniecie nie uruchamialo jednoczesnie kilku nakladajacych sie
-            // kontrolek (np. przycisku lezacego na panelu).
-            const hitOrder = [...sortedElements].filter(el => !isNonVisual(el.type)).reverse();
-            let firstHit = true;
-            hitOrder.forEach(el => {
-                const id = cIdent(el);
-                let relX = windowEl ? el.x - windowEl.x : el.x;
-                let relY = windowEl ? el.y - windowEl.y : el.y;
-                const hasCustom = el.onClick && el.onClick.trim() !== '';
-                const isEventable = EVENTOWALNE_TYPY.includes(el.type);
-                if (!hasCustom && !isEventable) return;
-
-                cppCode += `                ${firstHit ? '' : 'else '}if (punkt_w_prostokacie(mx, my, WIN_X + ${relX}, WIN_Y + ${relY}, ${el.w}, ${el.h})) {\n`;
-                firstHit = false;
-
-                if (el.type === 'TCheckBox' || el.type === 'TDBCheckBox') {
-                    cppCode += `                    zaznaczone_${id} = !zaznaczone_${id};\n`;
-                } else if (el.type === 'TRadioButton') {
-                    cppCode += `                    wybrane_${id} = !wybrane_${id};\n`;
-                } else if (el.type === 'TListBox') {
-                    const items = (el.text||"").split('\n').filter(i => i.trim() !== '');
-                    cppCode += `                    { int rel_y_${id} = my - (WIN_Y + ${relY}); int nowy_wybor_${id} = rel_y_${id} / 16; if (nowy_wybor_${id} >= 0 && nowy_wybor_${id} < ${Math.max(items.length,1)}) wybor_${id} = nowy_wybor_${id}; }\n`;
-                } else if (el.type === 'TCheckListBox') {
-                    cppCode += `                    zaznaczone_${id} = !zaznaczone_${id};\n`;
-                } else if (el.type === 'TComboBox' || el.type === 'TDBComboBox') {
-                    cppCode += `                    combo_otwarty_${id} = !combo_otwarty_${id};\n`;
-                }
-
-                if (hasCustom) {
-                    el.onClick.split('\n').forEach(l => { if (l.trim() !== '') cppCode += `                    ${l}\n`; });
-                }
-                cppCode += `                    redraw = true; pelne_czyszczenie = true;\n                }\n`;
-            });
-
-            if(windowEl) cppCode += `            }\n`;
-            cppCode += `        }\n\n`;
-            cppCode += `        if (dragging && lewy) {\n`;
-            cppCode += `            int nowy_x = mx - drag_off_x; int nowy_y = my - drag_off_y;\n`;
-            cppCode += `            ogranicz_pozycje_okna(&nowy_x, &nowy_y);\n`;
-            cppCode += `            if (nowy_x != WIN_X || nowy_y != WIN_Y) { WIN_X = nowy_x; WIN_Y = nowy_y; bws_przesun_warstwe(WIN_X, WIN_Y); gui_odswiez(); }\n`;
-            cppCode += `        }\n`;
-            cppCode += `        if (puszczenie_lewego && dragging) { dragging = false; gui_ustaw_capture_myszy(false); }\n`;
-            cppCode += `        if (redraw && !wyjdz) RysujInterfejs(pelne_czyszczenie);\n`;
-            cppCode += `    }\n`;
-            cppCode += `    gui_zakoncz_aplikacje();\n}\n`;
-
-            return cppCode;
-        }
-
-        function downloadCPP() {
-            const cppCode = generateCPPCode();
-            const blob = new Blob([cppCode], {type: 'text/plain'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'aplikacja_vcl.cpp';
-            a.click(); URL.revokeObjectURL(url);
-        }
-    </script>
+    <!-- Modal: przegladarka API BWS -->
+    <div id="api-modal" class="modal fixed inset-0 bg-black/80 z-[20000] items-center justify-center p-8 backdrop-blur-sm">
+        <div class="bg-carbon-900 border border-carbon-700 rounded-lg shadow-2xl w-full h-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-carbon-800 flex justify-between items-center bg-carbon-950">
+                <div>
+                    <h2 class="text-lg font-bold text-bursztyn-400">📚 Przeglądarka API BWS</h2>
+                    <div class="text-[10px] text-gray-400">Wywołania systemowe 1–56 · zdarzenia · struktury ABI (źródło: syscalls.cpp, bursztyn_gui.h, bws_zdarzenia.h, bws_pliki.h)</div>
+                </div>
+                <button onclick="closeApiBrowser()" class="bg-carbon-700 hover:bg-carbon-600 text-white px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors">Zamknij</button>
+            </div>
+            <div class="p-3 border-b border-carbon-800 bg-carbon-950">
+                <input type="text" id="api-search" placeholder="Szukaj: numer, nazwa, opis, grupa..." oninput="setApiFilter(this.value)" class="w-full bg-carbon-900 border border-carbon-700 text-gray-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-bursztyn-500 font-mono">
+            </div>
+            <div id="api-list" class="flex-1 overflow-y-auto custom-scrollbar p-2"></div>
+        </div>
+    </div>
+
+    <!-- Moduly aplikacji (kolejnosc ma znaczenie) -->
+    <script src="js/utils.js"></script>
+    <script src="js/bws_api.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/codegen.js"></script>
+    <script src="js/properties.js"></script>
+    <script src="js/api_browser.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
